@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react'
 import { assert } from '../utils/server.js'
 import { getViewportWidth } from '../utils/getViewportWidth.js'
 import { viewTablet, navLeftWidthMax, navLeftWidthMin, bodyMaxWidth } from '../Layout.js'
-import { throttle } from '../utils/throttle.js'
 import { Collapsible } from './Collapsible.js'
 import { ColumnMap, getNavItemsWithComputed, NavItem, NavItemComponent, NavItemComputed } from '../NavItemComponent.js'
 import { usePageContext } from '../renderer/usePageContext.js'
@@ -27,9 +26,17 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
   const updateViewportWidth = () => setViewportWidth(getViewportWidth())
   useEffect(() => {
     updateViewportWidth()
-    const onResize = throttle(updateViewportWidth, 300)
+    // Waits for the resizing to pause, so the final width is the one applied
+    let timer: ReturnType<typeof setTimeout>
+    const onResize = () => {
+      clearTimeout(timer)
+      timer = setTimeout(updateViewportWidth, 150)
+    }
     window.addEventListener('resize', onResize, { passive: true })
-    return () => window.removeEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      clearTimeout(timer)
+    }
   }, [])
   const availableWidth = viewportWidth && Math.min(viewportWidth, bodyMaxWidth)
   const navItemsByColumnLayouts = getNavItemsByColumnLayouts(navItemsWithComputed, availableWidth)
