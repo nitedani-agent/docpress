@@ -1,6 +1,7 @@
 /*
- * Design tokens. Every DocPress surface reads them, and nothing else: a site re-themes by overriding `--dp-*` (on :root
- * or body), and the dark appearance is the `dark` class on <html> (the dark block below).
+ * Design tokens. DocPress surfaces read them, and nothing else except the colors a page author gives a code highlight:
+ * a site re-themes by overriding `--dp-*` (on :root or body), and the dark appearance is the `dark` class on <html>
+ * (the dark block below).
  *
  * The `--dp-` prefix keeps the `--color-*` / `--font-*` that hosts' tools (e.g. Tailwind, daisyUI) set on `:root` out
  * of DocPress.
