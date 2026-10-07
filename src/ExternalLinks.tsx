@@ -57,7 +57,12 @@ function ChangelogButton() {
   const { version, github, changelog } = pageContext.globalContext.config.docpress
   const changeLogUrl = typeof changelog === 'string' ? changelog : `${github}/blob/main/CHANGELOG.md`
   return (
-    <a href={changeLogUrl} className="version-badge scale-on-press" aria-label={`Changelog (v${version})`}>
+    <a
+      href={changeLogUrl}
+      className="version-badge scale-on-press"
+      aria-label={`Changelog (v${version})`}
+      data-label-position="bottom-right"
+    >
       v{version}
     </a>
   )

@@ -199,6 +199,7 @@ function CloseButton({ className }: { className: string }) {
       className={`menu-modal-close scale-on-press ${className}`}
       onClick={closeMenuModalAndFocusToggle}
       aria-label="Close menu"
+      data-label-position="bottom-right"
     >
       <svg
         viewBox="0 0 24 24"

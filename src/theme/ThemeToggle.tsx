@@ -17,6 +17,7 @@ function ThemeToggle({ className }: { className?: string }) {
       className={cls(['theme-toggle scale-on-press', className])}
       onClick={toggleTheme}
       aria-label="Dark mode"
+      data-label-position="bottom-right"
     >
       <svg {...svgProps} className="theme-toggle-light">
         <circle cx="12" cy="12" r="4" />
