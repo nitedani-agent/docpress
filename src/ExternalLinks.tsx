@@ -12,11 +12,11 @@ import '@docsearch/css'
 import { ThemeToggle } from './theme/ThemeToggle.js'
 import './ExternalLinks.css'
 
-function ExternalLinks(props: { style?: React.CSSProperties; withThemeToggle?: boolean }) {
+function ExternalLinks(props: { style?: React.CSSProperties; withThemeToggle?: boolean; atRightEdge?: boolean }) {
   const pageContext = usePageContext()
   const { github, discord, bluesky, linkedin, i18n, twitter, changelog, darkMode } =
     pageContext.globalContext.config.docpress
-  const { withThemeToggle = true, ...propsRest } = props
+  const { withThemeToggle = true, atRightEdge, ...propsRest } = props
   return (
     <div
       {...propsRest}
@@ -46,13 +46,13 @@ function ExternalLinks(props: { style?: React.CSSProperties; withThemeToggle?: b
           brandColor="#0a66c2"
         />
       )}
-      {changelog !== false && <ChangelogButton />}
+      {changelog !== false && <ChangelogButton atRightEdge={atRightEdge} />}
       {darkMode && withThemeToggle && <ThemeToggle className="icon-button" />}
     </div>
   )
 }
 
-function ChangelogButton() {
+function ChangelogButton({ atRightEdge }: { atRightEdge?: boolean }) {
   const pageContext = usePageContext()
   const { version, github, changelog } = pageContext.globalContext.config.docpress
   const changeLogUrl = typeof changelog === 'string' ? changelog : `${github}/blob/main/CHANGELOG.md`
@@ -61,7 +61,7 @@ function ChangelogButton() {
       href={changeLogUrl}
       className="version-badge scale-on-press"
       aria-label={`Changelog (v${version})`}
-      data-label-position="bottom-right"
+      data-label-position={atRightEdge ? 'bottom-right' : undefined}
     >
       v{version}
     </a>

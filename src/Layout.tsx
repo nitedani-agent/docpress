@@ -365,6 +365,7 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
       {topNavigation}
       {navMaxWidth && <div className="desktop-grow" />}
       <ExternalLinks
+        atRightEdge
         style={{
           display: 'inline-flex',
           fontSize: '1.06em',
