@@ -6,7 +6,6 @@ export { viewMobile }
 export { navLeftWidthMin }
 export { navLeftWidthMax }
 export { bodyMaxWidth }
-export { scrollFadeMask }
 export { barShadow }
 
 // - @media VS @container
@@ -64,12 +63,6 @@ const barShadow = [
   `-${bodyMaxWidth}px ${blockMargin}px 0 var(--dp-color-border)`,
   `${bodyMaxWidth}px ${blockMargin}px 0 var(--dp-color-border)`,
 ].join(', ')
-
-// Scroll fade effect at top/bottom edges: `.scroll-fade` (scroll-fade.css), only while the container actually scrolls
-const scrollFadeMask: React.CSSProperties = {
-  // Force hardware acceleration to fix Chrome rendering bug (temporary bold text upon scrolling)
-  transform: 'translateZ(0)',
-}
 
 // Avoid whitespace at the bottom of pages with almost no content
 const whitespaceBuster1: React.CSSProperties = {
@@ -297,7 +290,6 @@ function NavLeft() {
               paddingBottom: 40,
               minWidth: navLeftWidthMin,
               width: '100%',
-              ...scrollFadeMask,
             }}
           >
             {navItemsDetached ? (

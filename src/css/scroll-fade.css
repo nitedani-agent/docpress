@@ -23,6 +23,8 @@
   initial-value: 100%;
 }
 .scroll-fade {
+  /* Force hardware acceleration to fix Chrome rendering bug (temporary bold text upon scrolling) */
+  transform: translateZ(0);
   mask-image: linear-gradient(to bottom, rgb(0 0 0 / 30%) 0, black 20px, black calc(100% - 20px), rgb(0 0 0 / 30%) 100%);
 }
 @supports (animation-timeline: scroll()) {

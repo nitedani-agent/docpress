@@ -3,7 +3,7 @@ export { MenuModal }
 import React from 'react'
 import { usePageContext } from './renderer/usePageContext.js'
 import { css } from './utils/css.js'
-import { viewDesktop, viewTablet, viewMobile, scrollFadeMask } from './Layout.js'
+import { viewDesktop, viewTablet, viewMobile } from './Layout.js'
 import { menuPaddingX } from './MenuModal/NavigationWithColumnLayout.js'
 import { ExternalLinks } from './ExternalLinks.js'
 import { Style } from './utils/Style.js'
@@ -37,7 +37,6 @@ function MenuModal() {
             overflowY: 'auto',
             // We don't set `container` to the parent #menu-modal-wrapper because of a Chrome bug (showing a blank <MenuModal>)
             container: 'container-viewport / inline-size',
-            ...scrollFadeMask,
           }}
         >
           <NavigationWithColumnLayout navItems={pageContext.resolved.navItemsAll} />
