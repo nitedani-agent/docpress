@@ -50,6 +50,8 @@ const navLeftWidthMin = 300
 const navLeftWidthMax = 370
 const viewMobile = 450
 const viewTablet = 1016
+// The full top bar (the demo's, with the search field) is squeezed below 1135px; below this, the search is an icon
+const viewSearchField = 1150
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
 // The frame: left navigation + page content + "On this page", and not wider (the eye doesn't travel far)
@@ -541,6 +543,16 @@ function getStyleLayout() {
   .nav-head-docs-link,
   .text-docs {
     display: flex;
+  }
+  @media (width < ${viewSearchField}px) {
+    .nav-head-content .search-box {
+      min-width: 0;
+      padding: 0 10px;
+    }
+    .nav-head-content .search-box-text,
+    .nav-head-content .search-box-kbd {
+      display: none;
+    }
   }
   .text-menu,
   .nav-head .nav-head-theme-toggle,
