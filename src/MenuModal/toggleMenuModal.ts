@@ -205,24 +205,15 @@ function toggleMenuModal(menuId: number) {
 function autoScroll() {
   const nav = document.querySelector('#menu-modal-wrapper .navigation-content')!
   const href = window.location.pathname
-  const navLinks = Array.from(nav.querySelectorAll(`a[href="${href}"]`))
-  const navLink = navLinks[0] as HTMLElement | undefined
+  const navLink = nav.querySelector(`a[href="${href}"]`)
   if (!navLink) return
   // None of the following seems to be working: https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
-  if (findCollapsibleEl(navLink)!.classList.contains('collapsible-collapsed')) return
+  if (navLink.closest('.collapsible')!.classList.contains('collapsible-collapsed')) return
   navLink.scrollIntoView({
     behavior: 'instant',
     block: 'center',
     inline: 'start',
   })
-}
-function findCollapsibleEl(navLink: HTMLElement | undefined) {
-  let parentEl: HTMLElement | null | undefined = navLink
-  while (parentEl) {
-    if (parentEl.classList.contains('collapsible')) return parentEl
-    parentEl = parentEl.parentElement
-  }
-  return null
 }
 
 function closeMenuModalOnMouseLeave() {
