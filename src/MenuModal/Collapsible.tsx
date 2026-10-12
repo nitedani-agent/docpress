@@ -66,9 +66,6 @@ function Collapsible({
           overflow: !showContent || isAnimating ? 'hidden' : undefined,
           // Collapsed: out of the tab order, once the animation is done
           visibility: !showContent && !isAnimating ? 'hidden' : undefined,
-          // Like the left navigation's groups
-          transition: 'none var(--dp-duration-reveal) var(--dp-ease-out)',
-          transitionProperty: 'height, margin-bottom',
           marginBottom: (showContent && marginBottomOnExpand) || undefined,
         }}
       >

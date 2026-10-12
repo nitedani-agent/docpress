@@ -48,12 +48,7 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
       <Style>{getStyle()}</Style>
       <div id="menu-navigation-container" className="navigation-content">
         {navItemsByColumnLayouts.map((columnLayout, i) => (
-          <div
-            id={`menu-navigation-${i}`}
-            className="menu-navigation-content"
-            style={{ transition: 'none 0.2s var(--dp-ease-out)', transitionProperty: 'opacity, transform, visibility' }}
-            key={i}
-          >
+          <div id={`menu-navigation-${i}`} className="menu-navigation-content" key={i}>
             {columnLayout.isFullWidthCategory ? (
               <div className="columns-wrapper">
                 <Collapsible
@@ -112,6 +107,9 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
 .menu-column {
   display: flex;
   flex-direction: column;
+}
+.menu-navigation-content {
+  transition: opacity 0.2s var(--dp-ease-out), transform 0.2s var(--dp-ease-out), visibility 0.2s var(--dp-ease-out);
 }
 @media (width <= ${viewTablet}px) {
   .columns-wrapper {

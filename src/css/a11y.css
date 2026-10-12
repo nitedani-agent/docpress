@@ -110,5 +110,5 @@ html {
 /* Keyboard-initiated disclosures don't animate (see initInputModality()). 1ms, not 0: `transitionend` still fires. */
 [data-input='keyboard']
   :is(#menu-navigation-container, .collapsible > div[id], .collapsible-icon, .caret-icon-left, .caret-icon-right) {
-  transition-duration: 1ms !important;
+  transition-duration: 1ms;
 }
