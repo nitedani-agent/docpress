@@ -50,9 +50,9 @@ const navLeftWidthMin = 300
 const navLeftWidthMax = 370
 const viewMobile = 450
 const viewTablet = 1016
-// The full top bar (the demo's, with the search field) is squeezed below 1135px; below this, the search is an icon
+// Below this (down to viewTablet), the demo's top bar with the full search field doesn't fit: the search is an icon
 const viewSearchField = 1150
-// The compact search up to this width: a fine pointer's field with the keyboard hint squeezed "Menu" at 320-382px and 451-460px
+// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (at 320-382px and 451-460px): the search is compact
 const viewSearchHint = 460
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
