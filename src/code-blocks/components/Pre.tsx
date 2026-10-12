@@ -1,4 +1,5 @@
 export { Pre }
+export { isPlainText }
 
 import React from 'react'
 import { cls } from '../../utils/cls.js'
@@ -84,8 +85,11 @@ const languageLabels: Record<string, string> = {
   graphql: 'GraphQL',
   dockerfile: 'Dockerfile',
 }
+function isPlainText(language: string) {
+  return language === 'plaintext' || language === 'text' || language === 'txt'
+}
 function getLanguageLabel(language: string): string | null {
-  if (language === 'plaintext' || language === 'text' || language === 'txt') return null
+  if (isPlainText(language)) return null
   // Mostly used to list files (a common convention in docs), which aren't YAML
   if (language === 'yaml' || language === 'yml') return null
   return languageLabels[language] ?? language

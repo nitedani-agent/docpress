@@ -1,5 +1,7 @@
 export { pageToMarkdown }
 
+import { isPlainText } from './code-blocks/components/Pre.js'
+
 // The page as Markdown, e.g. to paste it into an LLM. From what's rendered, not from the MDX source: links have their
 // titles and absolute URLs, a code block with choices has the selected one, components are rendered, and there's no UI
 // (buttons, dropdowns, icons).
@@ -140,7 +142,7 @@ function toList(list: Element): string {
 function toCodeBlock(pre: Element): string {
   const code = pre.querySelector('code') ?? pre
   let language = pre.getAttribute('data-language') ?? code.getAttribute('data-language') ?? ''
-  if (language === 'plaintext' || language === 'text') language = ''
+  if (isPlainText(language)) language = ''
   const lineElements = Array.from(code.querySelectorAll('[data-line]'))
   // An empty line holds a space (rehype-pretty-code); a notation comment (e.g. `// [!code ++]`) leaves a trailing one
   let lines = lineElements.length
