@@ -105,9 +105,6 @@ pre {
     & svg {
       width: 15px;
       height: 100%;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
   }
 }

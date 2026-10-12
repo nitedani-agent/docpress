@@ -2,7 +2,7 @@ export { Pre }
 
 import React from 'react'
 import { cls } from '../../utils/cls.js'
-import { useCopy, CopyAnnouncement } from '../../utils/useCopy.js'
+import { useCopy, CopyAnnouncement, CopyStatusIcon } from '../../utils/useCopy.js'
 import { usePageContext } from '../../renderer/usePageContext.js'
 import { classAdded, classRemoved } from '../../components/FileRemoved.js'
 import './Pre.css'
@@ -40,36 +40,6 @@ function Pre({ children, ...props }: React.ComponentPropsWithoutRef<'pre'> & Add
 function CopyButton() {
   const { status, copy } = useCopy()
   const tooltip = status === 'idle' ? 'Copy to clipboard' : status === 'copied' ? 'Copied' : 'Failed'
-  const icon =
-    status === 'idle' ? (
-      // Copy icon
-      <svg key="copy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-      </svg>
-    ) : status === 'copied' ? (
-      // Green checkmark
-      <svg
-        key="copied"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        stroke="var(--dp-color-success)"
-        strokeWidth="3"
-      >
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    ) : (
-      // Cross, like "Copy page"
-      <svg
-        key="failed"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        stroke="var(--dp-color-danger)"
-        strokeWidth="2"
-      >
-        <path d="M18 6 6 18M6 6l12 12" />
-      </svg>
-    )
   return (
     <>
       <button
@@ -83,7 +53,7 @@ function CopyButton() {
           copy(removeTrailingWhitespaces(code))
         }}
       >
-        {icon}
+        <CopyStatusIcon status={status} />
       </button>
       <CopyAnnouncement status={status} />
     </>

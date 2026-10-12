@@ -46,6 +46,10 @@
       box-shadow: var(--dp-shadow-raised-hover);
     }
   }
+  & svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* Narrow screens: icon only, so the title keeps the width (the label stays for screen readers) */

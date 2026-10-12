@@ -6,7 +6,7 @@ import { usePageContext } from './renderer/usePageContext.js'
 import { parseMarkdownMini } from './parseMarkdownMini.js'
 import { EditLink } from './EditLink.js'
 import { pageToMarkdown } from './pageToMarkdown.js'
-import { useCopy, CopyAnnouncement } from './utils/useCopy.js'
+import { useCopy, CopyAnnouncement, CopyStatusIcon } from './utils/useCopy.js'
 import './PageChrome.css'
 
 // Breadcrumb, title, and "Copy page"
@@ -36,36 +36,7 @@ function CopyPageButton() {
   return (
     <>
       <button type="button" className="copy-page-button scale-on-press" onClick={() => copy(pageToMarkdown())}>
-        <svg
-          // A new icon blends in (button.css)
-          key={status}
-          viewBox="0 0 24 24"
-          width="14"
-          height="14"
-          fill="none"
-          stroke={
-            status === 'copied'
-              ? 'var(--dp-color-success)'
-              : status === 'failed'
-                ? 'var(--dp-color-danger)'
-                : 'currentColor'
-          }
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          {status === 'copied' ? (
-            <path d="M20 6 9 17l-5-5" />
-          ) : status === 'failed' ? (
-            <path d="M18 6 6 18M6 6l12 12" />
-          ) : (
-            <>
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </>
-          )}
-        </svg>
+        <CopyStatusIcon status={status} />
         <span className="copy-page-label">Copy page</span>
       </button>
       <CopyAnnouncement status={status} />
