@@ -227,7 +227,7 @@ function getNavItemsByColumnLayouts(navItems: NavItemComputed[], availableWidth:
           }[]
         }[] = []
         columnEntries.forEach((columnEntry) => {
-          const idx = numberOfColumns === 1 ? 0 : columnEntry.columnMap[numberOfColumns]!
+          const idx = getColumnIndex(columnEntry, numberOfColumns)
           assert(idx >= 0)
           columns[idx] ??= { categories: [] }
           const navItemLevel1 = columnEntry.navItems[0]!
@@ -240,7 +240,7 @@ function getNavItemsByColumnLayouts(navItems: NavItemComputed[], availableWidth:
         let navItemLevel1: NavItemComputed
         const columns: { navItems: NavItemComputed[] }[] = []
         columnEntries.forEach((columnEntry, i) => {
-          const idx = numberOfColumns === 1 ? 0 : columnEntry.columnMap[numberOfColumns]!
+          const idx = getColumnIndex(columnEntry, numberOfColumns)
           assert(idx >= 0)
           columns[idx] ??= { navItems: [] }
           let { navItems } = columnEntry
@@ -273,7 +273,7 @@ function getBalancedNumberOfColumns(columnEntries: ColumnEntry[], numberOfColumn
   const getHeight = (numberOfColumns: number) => {
     const columnHeights: number[] = []
     columnEntries.forEach((columnEntry) => {
-      const idx = numberOfColumns === 1 ? 0 : columnEntry.columnMap[numberOfColumns]!
+      const idx = getColumnIndex(columnEntry, numberOfColumns)
       const height = columnHeights[idx]
       columnHeights[idx] =
         height === undefined ? getEntryHeight(columnEntry) : height + gapBetweenEntries + getEntryHeight(columnEntry)
@@ -286,6 +286,9 @@ function getBalancedNumberOfColumns(columnEntries: ColumnEntry[], numberOfColumn
 }
 type NavItemsByColumnEntries = { columnEntries: ColumnEntry[]; isFullWidthCategory: boolean }[]
 type ColumnEntry = { navItems: NavItemComputed[]; columnMap: ColumnMap }
+function getColumnIndex(columnEntry: ColumnEntry, numberOfColumns: number): number {
+  return numberOfColumns === 1 ? 0 : columnEntry.columnMap[numberOfColumns]!
+}
 function getNavItemsByColumnEntries(navItems: NavItemComputed[]): NavItemsByColumnEntries {
   const navItemsByColumnEntries: NavItemsByColumnEntries = []
   let columnEntries: ColumnEntry[] = []
