@@ -43,13 +43,10 @@
       height: 16px;
     }
   }
-  .nav-item-level-2 {
+  .nav-item-level-2,
+  .nav-item-level-3 {
     margin: 0 12px 0 var(--nav-indent);
-    padding: 6px 12px;
     border-left: 1px solid var(--dp-color-border);
-    font-size: 14px;
-    line-height: 20px;
-    font-weight: 450;
     color: var(--dp-color-muted);
     @media (hover: hover) and (pointer: fine) {
       &:hover {
@@ -57,6 +54,12 @@
         border-left-color: var(--dp-color-border-strong);
       }
     }
+  }
+  .nav-item-level-2 {
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 450;
     &.is-active {
       color: var(--dp-color-primary);
       font-weight: 600;
@@ -81,18 +84,9 @@
   }
   /* The current page's sections (shown when there is no "On this page" rail): on the same hairline, indented */
   .nav-item-level-3 {
-    margin: 0 12px 0 var(--nav-indent);
     padding: 4px 10px 4px 24px;
-    border-left: 1px solid var(--dp-color-border);
     font-size: 13px;
     line-height: 19px;
-    color: var(--dp-color-muted);
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        color: var(--dp-color-text);
-        border-left-color: var(--dp-color-border-strong);
-      }
-    }
   }
   /* Group labels, on the navigation's text edge */
   .nav-item-level-4 {
