@@ -21,7 +21,7 @@ function TopNavigation() {
           width={18}
           style={{ marginRight: 'var(--icon-text-padding)' }}
           className="decolorize-8"
-        />{' '}
+        />
         API
       </MenuToggle>
       <a className="colorize-on-hover" href="/features" style={linkStyle}>

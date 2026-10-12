@@ -50,7 +50,7 @@ const navLeftWidthMin = 300
 const navLeftWidthMax = 370
 const viewMobile = 450
 const viewTablet = 1016
-// Below this (down to viewTablet), the demo's top bar with the full search field doesn't fit: the search is an icon
+// Below this (down to viewTablet), the search is an icon: the demo's top bar with the full search field needs 1137px
 const viewSearchField = 1150
 // Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (at 320-382px and 451-460px): the search is compact
 const viewSearchHint = 460

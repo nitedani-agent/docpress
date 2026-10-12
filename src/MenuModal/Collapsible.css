@@ -15,7 +15,6 @@
     transform: rotate(-90deg);
   }
 }
-/* Like the left navigation's groups */
 .collapsible > div[id] {
   transition: height var(--dp-duration-reveal) var(--dp-ease-out), margin-bottom var(--dp-duration-reveal)
     var(--dp-ease-out);
