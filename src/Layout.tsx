@@ -579,6 +579,23 @@ function getStyleLayout() {
   .show-only-on-mobile {
     display: none;
   }
+  /* A menu's toggle while its menu is open */
+  .menu-toggle[aria-expanded='true'] {
+    color: var(--dp-color-text);
+    [class^='decolorize-'],
+    [class*=' decolorize-'] {
+      filter: grayscale(0) opacity(1);
+    }
+    &::before {
+      top: 0;
+    }
+    & .caret-icon-left {
+      transform: rotate(-90deg);
+    }
+    & .caret-icon-right {
+      transform: rotate(90deg);
+    }
+  }
   .desktop-grow,
   .has-max-width .nav-head-secondary {
     flex-grow: 1;

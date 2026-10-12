@@ -184,25 +184,6 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
     display: none;
   }
 }
-${/* Button style */ ''}
-.menu-toggle-${i} {
-  html.menu-modal-show.menu-modal-show-${i} & {
-    color: var(--dp-color-text);
-    [class^='decolorize-'],
-    [class*=' decolorize-'] {
-      filter: grayscale(0) opacity(1);
-    }
-    &::before {
-      top: 0;
-    }
-    & .caret-icon-left {
-      transform: rotate(-90deg);
-    }
-    & .caret-icon-right {
-      transform: rotate(90deg);
-    }
-  }
-}
 `
    })
    .join('')}
