@@ -80,12 +80,17 @@ const whitespaceBuster2: React.CSSProperties = {
 
 function Layout({ children }: { children: React.ReactNode }) {
   const pageContext = usePageContext()
-  const { isLandingPage, pageDesign } = pageContext.resolved
+  const { isLandingPage, pageDesign, navItemsDetached } = pageContext.resolved
   const isTopNavSticky = !isLandingPage && (pageDesign?.topNavSticky ?? true)
+  const isNavLeftAlwaysHidden =
+    isLandingPage || !!pageDesign?.hideMenuLeft || !!(navItemsDetached && navItemsDetached.length <= 1)
 
-  const content = isLandingPage ? <PageContent>{children}</PageContent> : <LayoutDocsPage>{children}</LayoutDocsPage>
+  const content = isLandingPage ? (
+    <PageContent>{children}</PageContent>
+  ) : (
+    <LayoutDocsPage isNavLeftAlwaysHidden={isNavLeftAlwaysHidden}>{children}</LayoutDocsPage>
+  )
 
-  const isNavLeftAlwaysHidden_ = isNavLeftAlwaysHidden()
   const hasCategoryTabs = !!pageContext.globalContext.config.docpress.categoryTabs && !isLandingPage
   return (
     <div
@@ -102,12 +107,12 @@ function Layout({ children }: { children: React.ReactNode }) {
         // We don't add `container` to `body` nor `html` beacuse in Firefox it breaks the `position: fixed` of <MenuModal>
         // https://stackoverflow.com/questions/74601420/css-container-inline-size-and-fixed-child
         container: 'container-viewport / inline-size',
-        maxWidth: isNavLeftAlwaysHidden_ ? undefined : bodyMaxWidth,
+        maxWidth: isNavLeftAlwaysHidden ? undefined : bodyMaxWidth,
         margin: 'auto',
       }}
     >
       {/* Before the markup it styles: the first paint has the right layout */}
-      <Style>{getStyleLayout()}</Style>
+      <Style>{getStyleLayout(isNavLeftAlwaysHidden)}</Style>
       {/* Focused elements aren't hidden under the sticky top nav (for headings, see heading.css) */}
       {isTopNavSticky && (
         <Style>{`:where(a, button, input, select, textarea, summary, [tabindex]):focus { scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px); }`}</Style>
@@ -130,7 +135,10 @@ function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function LayoutDocsPage({ children }: { children: React.ReactNode }) {
+function LayoutDocsPage({
+  children,
+  isNavLeftAlwaysHidden,
+}: { children: React.ReactNode; isNavLeftAlwaysHidden: boolean }) {
   const { navItemsDetached, tocItems } = usePageContext().resolved
   // The rail lists the page's sections: a detached page's left navigation would only list the page itself
   const isNavLeftHiddenByTocRail = !!navItemsDetached && tocItems.length > 0
@@ -161,7 +169,7 @@ function LayoutDocsPage({ children }: { children: React.ReactNode }) {
 }
 ${
   // Only where <TocRail> is rendered (below)
-  isNavLeftAlwaysHidden()
+  isNavLeftAlwaysHidden
     ? ''
     : css`
 @container container-viewport (width < ${viewTocRail}px) {
@@ -213,7 +221,7 @@ ${
 }
 `}</Style>
       <div style={{ display: 'flex', ...whitespaceBuster2 }}>
-        {!isNavLeftAlwaysHidden() && (
+        {!isNavLeftAlwaysHidden && (
           <>
             <NavLeft />
             <div id="nav-left-margin" className="low-prio-grow" style={{ width: 0, maxWidth: 50 }} />
@@ -221,7 +229,7 @@ ${
         )}
         {/* Before the page content in the HTML (it's parsed and painted with the first chunk: the content doesn't
             shift when it arrives), after it on the screen (flex order, TocRail.css) */}
-        {!isNavLeftAlwaysHidden() && <TocRail />}
+        {!isNavLeftAlwaysHidden && <TocRail />}
         <PageContent>{children}</PageContent>
       </div>
     </>
@@ -336,11 +344,6 @@ function NavigationContent(props: {
     </div>
   )
 }
-function isNavLeftAlwaysHidden() {
-  const pageContext = usePageContext()
-  const { isLandingPage, navItemsDetached, pageDesign } = pageContext.resolved
-  return isLandingPage || !!pageDesign?.hideMenuLeft || !!(navItemsDetached && navItemsDetached.length <= 1)
-}
 
 function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
   const pageContext = usePageContext()
@@ -428,7 +431,7 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
     </nav>
   )
 }
-function getStyleLayout() {
+function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   let style = ''
 
   // The top bar
@@ -632,7 +635,7 @@ function getStyleLayout() {
   }
 }
 ${
-  isNavLeftAlwaysHidden()
+  isNavLeftAlwaysHidden
     ? css`
 @media (width > ${viewTablet}px) {
   .page-wrapper {
@@ -650,7 +653,7 @@ ${
 }`
 
   // Desktop
-  if (!isNavLeftAlwaysHidden()) {
+  if (!isNavLeftAlwaysHidden) {
     style += css`
 @container container-viewport (width < ${viewDesktop}px) {
   #nav-left, #nav-left-margin {
