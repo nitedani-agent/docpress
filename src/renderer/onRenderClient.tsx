@@ -39,16 +39,16 @@ async function onRenderClient(pageContext: PageContextClient) {
   page = <OnRenderDoneHook renderPromiseResolve={renderPromiseResolve}>{page}</OnRenderDoneHook>
 
   const container = document.getElementById('page-view')!
-  if (!pageContext.isHydration) startNavSwitching()
   if (pageContext.isHydration) {
     globalObject.root = ReactDOM.hydrateRoot(container, page)
   } else {
+    startNavSwitching()
     if (!globalObject.root) {
       globalObject.root = ReactDOM.createRoot(container)
     }
     globalObject.root.render(page)
+    applyHead(pageContext)
   }
-  if (!pageContext.isHydration) applyHead(pageContext)
   // Created upon hydration, empty: a live region announces changes, not its creation
   const announcer = getAnnouncer()
 
