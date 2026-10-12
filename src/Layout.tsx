@@ -52,6 +52,8 @@ const viewMobile = 450
 const viewTablet = 1016
 // The full top bar (the demo's, with the search field) is squeezed below 1135px; below this, the search is an icon
 const viewSearchField = 1150
+// The compact search up to this width: a fine pointer's field with the keyboard hint squeezed "Menu" at 320-382px and 451-460px
+const viewSearchHint = 460
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
 // The frame: left navigation + page content + "On this page", and not wider (the eye doesn't travel far)
@@ -493,7 +495,12 @@ function getStyleLayout() {
   .nav-head-content {
     justify-content: center;
   }
-  .nav-head-content > :is(.search-link, .nav-head-docs-link) {
+  .nav-head-content > .nav-head-docs-link {
+    padding: 0 var(--padding-side);
+  }
+}
+@media (${viewMobile}px < width <= ${viewTablet}px), (width >= ${viewSearchField}px) {
+  .nav-head-content > .search-link {
     padding: 0 var(--padding-side);
   }
 }`
@@ -532,6 +539,24 @@ function getStyleLayout() {
   }
 }`
 
+  // The compact search: phones and the narrow desktop bar
+  style += css`
+@media (width <= ${viewSearchHint}px), (${viewTablet}px < width < ${viewSearchField}px) {
+  .nav-head-content .search-box {
+    min-width: 0;
+    padding: 0 10px;
+  }
+  .nav-head-content .search-box-kbd {
+    display: none;
+  }
+}
+/* Even with the icon search, the touch bar (40px icon buttons) overflowed 1017px by 12px (categoryTabs landing) */
+@media (${viewTablet}px < width < ${viewSearchField}px) {
+  .nav-head-content > .search-link {
+    padding: 0 5px;
+  }
+}`
+
   // Desktop small + desktop
   style += css`
 @media (width > ${viewTablet}px) {
@@ -545,12 +570,7 @@ function getStyleLayout() {
     display: flex;
   }
   @media (width < ${viewSearchField}px) {
-    .nav-head-content .search-box {
-      min-width: 0;
-      padding: 0 10px;
-    }
-    .nav-head-content .search-box-text,
-    .nav-head-content .search-box-kbd {
+    .nav-head-content .search-box-text {
       display: none;
     }
   }
