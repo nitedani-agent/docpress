@@ -550,6 +550,12 @@ function getStyleLayout() {
     display: none;
   }
 }
+/* The icon alone: narrow phones (the top nav also holds the logo, the theme toggle and the menu) and the narrow desktop bar */
+@media (width <= 400px), (${viewTablet}px < width < ${viewSearchField}px) {
+  .nav-head-content .search-box-text {
+    display: none;
+  }
+}
 /* Even with the icon search, the touch bar (40px icon buttons) overflowed 1017px by 12px (categoryTabs landing) */
 @media (${viewTablet}px < width < ${viewSearchField}px) {
   .nav-head-content > .search-link {
@@ -568,11 +574,6 @@ function getStyleLayout() {
   .nav-head-docs-link,
   .text-docs {
     display: flex;
-  }
-  @media (width < ${viewSearchField}px) {
-    .nav-head-content .search-box-text {
-      display: none;
-    }
   }
   .text-menu,
   .nav-head .nav-head-theme-toggle,

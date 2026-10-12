@@ -40,12 +40,6 @@
   line-height: 16px;
   white-space: nowrap;
 }
-/* Narrow phones: the top nav also holds the logo, the theme toggle and the menu */
-@media (max-width: 400px) {
-  .search-box-text {
-    display: none;
-  }
-}
 /* No keyboard shortcut on touch devices */
 @media not all and (hover: hover) and (pointer: fine) {
   .search-box-kbd {

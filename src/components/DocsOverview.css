@@ -44,10 +44,6 @@
     padding: 2px 7px;
     font-size: 12px;
   }
-  /* Also on narrow screens (the top bar's field hides it there) */
-  .search-box-text {
-    display: inline;
-  }
 }
 
 /* Sections */
