@@ -1,10 +1,10 @@
 {
   "name": "@brillout/docpress",
-  "version": "0.17.7",
+  "version": "0.17.8",
   "type": "module",
   "scripts": {
     "======== Build": "",
-    "// Build vite.config.ts and +config.ts (other files don't need to be built as @brillout/docpress is noExternal)": "",
+    "// Build vite.config.ts, +config.ts, and the CLI (other files don't need to be built as @brillout/docpress is noExternal)": "",
     "build": "rm -rf dist/ && tsc --project tsconfig.build.json",
     "======== Develop": "",
     "// Typecheck": "",
@@ -54,6 +54,9 @@
       "types": "./types.d.ts"
     }
   },
+  "bin": {
+    "docpress": "./bin.js"
+  },
   "typesVersions": {
     "*": {
       "*": [
@@ -68,7 +71,7 @@
     }
   },
   "devDependencies": {
-    "@brillout/release-me": "^0.4.8",
+    "@brillout/release-me": "^0.4.19",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.10.0",
