@@ -6,6 +6,8 @@ import { parseMarkdownMini } from '../parseMarkdownMini.js'
 import { SearchLink } from '../docsearch/SearchLink.js'
 import './DocsOverview.css'
 
+const pagesPerCategory = 5
+
 type StartLink = {
   href: string
   /** Default: the page's title */
@@ -21,7 +23,6 @@ function DocsOverview({
   title,
   children,
   start = [],
-  pagesPerCategory = 5,
 }: {
   /** The hero's title. Without it, no hero: only the cards. */
   title?: string
@@ -29,7 +30,6 @@ function DocsOverview({
   children?: React.ReactNode
   /** The pages to start with, as large cards. A category whose pages are all here isn't repeated below. */
   start?: StartLink[]
-  pagesPerCategory?: number
 }) {
   const pageContext = usePageContext()
   const { algolia } = pageContext.globalContext.config.docpress
