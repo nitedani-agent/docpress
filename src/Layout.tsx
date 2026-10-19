@@ -498,17 +498,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .nav-head-content {
     justify-content: center;
   }
-  .nav-head-content > .nav-head-docs-link {
-    padding: 0 var(--padding-side);
-  }
-}
-@media (${viewMobile}px < width <= ${viewTablet}px) {
-  .nav-head-content > .search-link {
-    padding: 0 var(--padding-side);
-  }
-}
-@container container-viewport (width >= ${viewSearchField}px) {
-  .nav-head-content > .search-link {
+  .nav-head-content > :is(.search-link, .nav-head-docs-link) {
     padding: 0 var(--padding-side);
   }
 }`
@@ -564,9 +554,13 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     display: none;
   }
 }
-/* The narrow desktop bar: the icon alone */
+/* The narrow desktop bar: the icon alone, and tighter gaps (with 1.2cqw gaps, the touch bar with categoryTabs needs 1017px
+   on the landing page, and the desktop bar starts at 1002px beside a classic scrollbar) */
 @media (width > ${viewTablet}px) {
   @container container-viewport (width < ${viewSearchField}px) {
+    .nav-head-content {
+      --padding-side: 9px;
+    }
     .nav-head-content .search-box {
       min-width: 0;
       padding: 0 10px;
@@ -574,10 +568,6 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     .nav-head-content .search-box-kbd,
     .nav-head-content .search-box-text {
       display: none;
-    }
-    /* Even with the icon search, the touch bar (40px icon buttons) overflowed 1017px by 12px (categoryTabs landing) */
-    .nav-head-content > .search-link {
-      padding: 0 5px;
     }
   }
 }`
@@ -587,7 +577,12 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
 @media (width > ${viewTablet}px) {
   .nav-head-content {
     --icon-text-padding: min(8px, 0.5cqw);
-    --padding-side: min(20px, 1.2cqw);
+  }
+  /* Below: the narrow desktop bar */
+  @container container-viewport (width >= ${viewSearchField}px) {
+    .nav-head-content {
+      --padding-side: min(20px, 1.2cqw);
+    }
   }
   .nav-head-secondary,
   .nav-head-docs-link,
