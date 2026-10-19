@@ -5,10 +5,7 @@ export { initTooltipGroup }
 const showDelay = 350
 const resetDelay = 300
 
-let isInstalled = false
 function initTooltipGroup() {
-  if (isInstalled) return
-  isInstalled = true
   let showTimer: ReturnType<typeof setTimeout> | undefined
   let resetTimer: ReturnType<typeof setTimeout> | undefined
   document.addEventListener(

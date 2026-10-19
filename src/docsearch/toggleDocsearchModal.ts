@@ -30,10 +30,7 @@ function isClosed() {
 }
 
 // Closing the search modal returns the focus where it was (DocSearch's own button, which it would focus, is hidden)
-let isFocusReturnInstalled = false
 function initDocsearchFocusReturn() {
-  if (isFocusReturnInstalled) return
-  isFocusReturnInstalled = true
   let focusedBefore: HTMLElement | null = null
   document.addEventListener('focusin', (ev) => {
     const target = ev.target as HTMLElement
