@@ -52,7 +52,7 @@ const viewMobile = 450
 const viewTablet = 1016
 // A desktop bar narrower than this has the search as an icon: the demo's top bar with the full search field needs 1133-1137px, by font
 const viewSearchField = 1150
-// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (in a bar of 320-382px or 451-460px): the search is compact
+// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (in the phone bar up to 386px, and in the tablet bar up to 460px): the search is compact
 const viewSearchHint = 460
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
@@ -537,7 +537,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   }
 }`
 
-  // The compact search: phones and the narrow desktop bar. By the bar's width (@container: inside a classic scrollbar).
+  // The compact search: phones and the narrow desktop bar. By the bar's width (@container: without a classic scrollbar).
   style += css`
 @container container-viewport (width <= ${viewSearchHint}px) {
   .nav-head-content .search-box {
@@ -554,13 +554,9 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     display: none;
   }
 }
-/* The narrow desktop bar: the icon alone, and tighter gaps (with 1.2cqw gaps, the touch bar with categoryTabs needs 1017px
-   on the landing page, and the desktop bar starts at 1002px beside a classic scrollbar) */
+/* The narrow desktop bar: the icon alone */
 @media (width > ${viewTablet}px) {
   @container container-viewport (width < ${viewSearchField}px) {
-    .nav-head-content {
-      --padding-side: 9px;
-    }
     .nav-head-content .search-box {
       min-width: 0;
       padding: 0 10px;
@@ -578,7 +574,13 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .nav-head-content {
     --icon-text-padding: min(8px, 0.5cqw);
   }
-  /* Below: the narrow desktop bar */
+  /* Tighter gaps in the narrow desktop bar (with 1.2cqw gaps, the touch bar with categoryTabs needs 1028px on the
+     landing page, and the desktop bar starts at 1002px beside a classic scrollbar) */
+  @container container-viewport (width < ${viewSearchField}px) {
+    .nav-head-content {
+      --padding-side: 9px;
+    }
+  }
   @container container-viewport (width >= ${viewSearchField}px) {
     .nav-head-content {
       --padding-side: min(20px, 1.2cqw);
