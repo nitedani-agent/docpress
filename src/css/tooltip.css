@@ -34,9 +34,11 @@
       transition: none;
     }
     &::before {
+      --transition-tooltip-duration: 125ms;
       opacity: 0;
       translate: 0 -3px;
-      transition: opacity 125ms var(--dp-ease-out), translate 125ms var(--dp-ease-out);
+      transition: opacity var(--transition-tooltip-duration) var(--dp-ease-out), translate
+        var(--transition-tooltip-duration) var(--dp-ease-out);
       pointer-events: none;
       font-family: var(--dp-font-sans);
       font-size: 12px;

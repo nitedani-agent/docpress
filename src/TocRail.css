@@ -42,6 +42,7 @@
   }
 }
 .toc-thumb {
+  --transition-toc-thumb-duration: 180ms;
   position: absolute;
   left: 0;
   top: var(--thumb-top, 0);
@@ -51,7 +52,8 @@
   background: var(--dp-color-primary);
   /* Glides from item to item (with reading progress, it follows the scroll: TocRail.tsx glides it) */
   .toc-rail-sticky:not(.toc-progress) & {
-    transition: top 180ms var(--dp-ease-out), height 180ms var(--dp-ease-out);
+    transition: top var(--transition-toc-thumb-duration) var(--dp-ease-out), height var(--transition-toc-thumb-duration)
+      var(--dp-ease-out);
   }
 }
 .toc-item {

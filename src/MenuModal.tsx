@@ -75,6 +75,7 @@ html:not(.menu-modal-show) #menu-modal-wrapper {
   ${/* A raised panel floating just below the top bar: centered on its menu's toggle (--menu-anchor, toggleMenuModal.ts), */ ''}
   ${/* sized to its columns (--menu-width, NavigationWithColumnLayout.tsx), kept within the frame */ ''}
   #menu-modal-wrapper {
+    --transition-menu-close-duration: 250ms;
     top: calc(var(--nav-head-height) + 8px);
     width: var(--menu-width, calc(100% - 32px));
     left: clamp(
@@ -107,7 +108,7 @@ html:not(.menu-modal-show) #menu-modal-wrapper {
   }
   html:not(.menu-modal-show) #menu-modal-wrapper {
     pointer-events: none;
-    transition: opacity 250ms ease, visibility 250ms ease;
+    transition: opacity var(--transition-menu-close-duration) ease, visibility var(--transition-menu-close-duration) ease;
   }
   ${/* Opening: in place, visible at once (e.g. to move the focus inside) */ ''}
   html.menu-modal-show.menu-modal-display-only-one #menu-modal-wrapper {

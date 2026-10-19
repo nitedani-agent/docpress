@@ -1,6 +1,9 @@
 /* Copy buttons: the new icon (e.g. the check after copying) blends in */
 :is(.copy-button, .copy-page-button) svg {
-  transition: opacity 200ms var(--dp-ease-out), scale 200ms var(--dp-ease-out), filter 200ms var(--dp-ease-out);
+  --transition-copy-icon-duration: 200ms;
+  transition: opacity var(--transition-copy-icon-duration) var(--dp-ease-out), scale
+    var(--transition-copy-icon-duration) var(--dp-ease-out), filter var(--transition-copy-icon-duration)
+    var(--dp-ease-out);
   @starting-style {
     opacity: 0;
     scale: 0.8;

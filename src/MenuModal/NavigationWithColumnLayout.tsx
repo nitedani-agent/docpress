@@ -109,7 +109,10 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
   flex-direction: column;
 }
 .menu-navigation-content {
-  transition: opacity 0.2s var(--dp-ease-out), transform 0.2s var(--dp-ease-out), visibility 0.2s var(--dp-ease-out);
+  --transition-menu-content-duration: 0.2s;
+  transition: opacity var(--transition-menu-content-duration) var(--dp-ease-out), transform
+    var(--transition-menu-content-duration) var(--dp-ease-out), visibility var(--transition-menu-content-duration)
+    var(--dp-ease-out);
 }
 @media (width <= ${viewTablet}px) {
   .columns-wrapper {
@@ -148,9 +151,10 @@ function NavigationWithColumnLayout(props: { navItems: NavItem[] }) {
     min-width: 0;
   }
   #menu-navigation-container {
+    --transition-menu-height-duration: 250ms;
     position: relative;
     overflow: hidden;
-    transition: height 250ms var(--dp-ease-out);
+    transition: height var(--transition-menu-height-duration) var(--dp-ease-out);
   }
   ${/* Its menus are absolutely positioned: the current one's height (followHeight(), toggleMenuModal.ts) */ ''}
   html.menu-modal-show #menu-navigation-container {

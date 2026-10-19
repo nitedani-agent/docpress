@@ -12,6 +12,8 @@
   }
   /* Like the copy button */
   --border-radius: var(--dp-radius-sm);
+  --transition-select-list-duration: 180ms;
+  --transition-select-option-duration: 120ms;
 
   .choice-group__selects {
     position: absolute;
@@ -132,13 +134,15 @@
 
   /* Animated only while hovered (not e.g. when the choice changes elsewhere on the page) */
   .choice-select__list.hovered {
-    transition: top 180ms var(--dp-ease-out), clip-path 180ms var(--dp-ease-out);
+    transition: top var(--transition-select-list-duration) var(--dp-ease-out), clip-path
+      var(--transition-select-list-duration) var(--dp-ease-out);
     /* In sync with the list */
     .choice-select__border {
-      transition: top 180ms var(--dp-ease-out), height 180ms var(--dp-ease-out);
+      transition: top var(--transition-select-list-duration) var(--dp-ease-out), height
+        var(--transition-select-list-duration) var(--dp-ease-out);
     }
     .choice-select__option {
-      transition: background 120ms ease;
+      transition: background var(--transition-select-option-duration) ease;
     }
   }
 

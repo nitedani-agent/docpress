@@ -12,7 +12,8 @@
 /* Switching (applyTheme.ts): a crossfade of the whole page */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 250ms;
+  --transition-theme-duration: 250ms;
+  animation-duration: var(--transition-theme-duration);
   animation-timing-function: ease;
 }
 /* No element transitions while the page is captured and crossfaded */

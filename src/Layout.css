@@ -4,6 +4,7 @@ body {
 
 /* A top bar menu's toggle (<MenuToggle>): the bar's full height; hovered, its fill slides in from below */
 .menu-toggle {
+  --transition-menu-toggle-duration: 180ms;
   position: relative;
   z-index: 0;
   display: flex;
@@ -30,7 +31,7 @@ body {
     width: 100%;
     top: var(--nav-head-height);
     background-color: var(--dp-color-surface-hover);
-    transition: top 180ms ease;
+    transition: top var(--transition-menu-toggle-duration) ease;
     z-index: -1;
   }
   & .caret-icon-left,
