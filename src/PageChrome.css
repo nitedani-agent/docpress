@@ -1,11 +1,6 @@
 .page-header {
   margin-bottom: 24px;
 }
-.page-header h1 {
-  /* Grows from 0, so "Copy page" wraps below only when the title's longest word leaves it no room */
-  flex: 1;
-  margin: 0;
-}
 .page-breadcrumb {
   display: flex;
   flex-wrap: wrap;
@@ -26,6 +21,11 @@
   align-items: flex-start;
   justify-content: flex-end;
   gap: 0 16px;
+}
+.page-header h1 {
+  /* Grows from 0, so "Copy page" wraps below only when the title's longest word leaves it no room */
+  flex: 1;
+  margin: 0;
 }
 .copy-page-button {
   display: inline-flex;
