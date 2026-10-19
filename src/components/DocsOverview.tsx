@@ -63,7 +63,7 @@ function DocsOverview({
                 <a
                   key={link.href}
                   href={link.href}
-                  className="docs-overview-link docs-overview-start-card"
+                  className="docs-overview-link docs-overview-start-card scale-on-press-subtle"
                   style={{ '--color-category': found?.category.color }}
                 >
                   {found?.category.titleIcon && <CategoryIcon src={found.category.titleIcon} />}

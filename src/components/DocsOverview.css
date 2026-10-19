@@ -110,7 +110,6 @@
   border-radius: var(--dp-radius-lg);
   background: var(--dp-color-surface-elevated);
   box-shadow: var(--dp-shadow-raised);
-  transition: box-shadow var(--dp-duration) ease, transform var(--dp-duration-press) var(--dp-ease-out);
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       box-shadow: var(--dp-shadow-raised-hover);
@@ -119,9 +118,6 @@
         color: var(--dp-color-heading);
       }
     }
-  }
-  &:active {
-    transform: scale(0.99);
   }
 }
 .docs-overview-start-text {
