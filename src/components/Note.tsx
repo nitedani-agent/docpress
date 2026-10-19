@@ -15,6 +15,7 @@ export { Note }
 
 import React from 'react'
 import { assert } from '../utils/assert.js'
+import { cls } from '../utils/cls.js'
 import './Note.css'
 
 type Props = {
@@ -58,7 +59,7 @@ function NoteGeneric({
 }) {
   assert(icon === null || icon || type, { icon, type })
 
-  const className = ['callout', type && `callout-${type}`, icon === null && 'callout-no-icon'].filter(Boolean).join(' ')
+  const className = cls(['callout', type && `callout-${type}`, icon === null && 'callout-no-icon'])
   const iconResolved = icon === undefined ? calloutIcons[type!] : icon
   return (
     <blockquote className={className} style={style}>
