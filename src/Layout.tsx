@@ -50,9 +50,9 @@ const navLeftWidthMin = 300
 const navLeftWidthMax = 370
 const viewMobile = 450
 const viewTablet = 1016
-// Below this (down to viewTablet), the search is an icon: the demo's top bar with the full search field needs 1133-1137px, by font
+// A desktop bar narrower than this has the search as an icon: the demo's top bar with the full search field needs 1133-1137px, by font
 const viewSearchField = 1150
-// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (at 320-382px and 451-460px): the search is compact
+// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (in a bar of 320-382px or 451-460px): the search is compact
 const viewSearchHint = 460
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
@@ -502,7 +502,12 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     padding: 0 var(--padding-side);
   }
 }
-@media (${viewMobile}px < width <= ${viewTablet}px), (width >= ${viewSearchField}px) {
+@media (${viewMobile}px < width <= ${viewTablet}px) {
+  .nav-head-content > .search-link {
+    padding: 0 var(--padding-side);
+  }
+}
+@container container-viewport (width >= ${viewSearchField}px) {
   .nav-head-content > .search-link {
     padding: 0 var(--padding-side);
   }
@@ -542,9 +547,9 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   }
 }`
 
-  // The compact search: phones and the narrow desktop bar
+  // The compact search: phones and the narrow desktop bar. By the bar's width (@container: inside a classic scrollbar).
   style += css`
-@media (width <= ${viewSearchHint}px), (${viewTablet}px < width < ${viewSearchField}px) {
+@container container-viewport (width <= ${viewSearchHint}px) {
   .nav-head-content .search-box {
     min-width: 0;
     padding: 0 10px;
@@ -553,16 +558,27 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     display: none;
   }
 }
-/* The icon alone: narrow phones (the top nav also holds the logo, the theme toggle and the menu) and the narrow desktop bar */
-@media (width <= 400px), (${viewTablet}px < width < ${viewSearchField}px) {
+/* The icon alone: narrow phones (the top nav also holds the logo, the theme toggle and the menu) */
+@container container-viewport (width <= 400px) {
   .nav-head-content .search-box-text {
     display: none;
   }
 }
-/* Even with the icon search, the touch bar (40px icon buttons) overflowed 1017px by 12px (categoryTabs landing) */
-@media (${viewTablet}px < width < ${viewSearchField}px) {
-  .nav-head-content > .search-link {
-    padding: 0 5px;
+/* The narrow desktop bar: the icon alone */
+@media (width > ${viewTablet}px) {
+  @container container-viewport (width < ${viewSearchField}px) {
+    .nav-head-content .search-box {
+      min-width: 0;
+      padding: 0 10px;
+    }
+    .nav-head-content .search-box-kbd,
+    .nav-head-content .search-box-text {
+      display: none;
+    }
+    /* Even with the icon search, the touch bar (40px icon buttons) overflowed 1017px by 12px (categoryTabs landing) */
+    .nav-head-content > .search-link {
+      padding: 0 5px;
+    }
   }
 }`
 
