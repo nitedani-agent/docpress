@@ -50,7 +50,7 @@ const navLeftWidthMin = 300
 const navLeftWidthMax = 370
 const viewMobile = 450
 const viewTablet = 1016
-// A desktop bar narrower than this has the search as an icon: the demo's top bar with the full search field needs 1150px (measured with Inter)
+// A desktop bar narrower than this has the search as an icon, unless the search is centered (the bar has no `topNavigation` links, the full field fits): the demo's top bar with the full search field needs 1150px (measured with Inter)
 const viewSearchField = 1150
 // Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (in the phone bar up to 386px, and in the tablet bar up to 457px): the search is compact
 const viewSearchHint = 460
@@ -554,15 +554,15 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     display: none;
   }
 }
-/* The narrow desktop bar: the icon alone */
+/* The narrow desktop bar: the icon alone (not the search-centered bar) */
 @media (width > ${viewTablet}px) {
   @container container-viewport (width < ${viewSearchField}px) {
-    .nav-head-content .search-box {
+    .nav-head-content:not(.nav-head-content-search-centered) .search-box {
       min-width: 0;
       padding: 0 10px;
     }
-    .nav-head-content .search-box-kbd,
-    .nav-head-content .search-box-text {
+    .nav-head-content:not(.nav-head-content-search-centered) .search-box-kbd,
+    .nav-head-content:not(.nav-head-content-search-centered) .search-box-text {
       display: none;
     }
   }
