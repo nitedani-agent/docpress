@@ -13,7 +13,7 @@
     var(--dp-ease-out);
 }
 
-/* Black SVG icons (a choice's `iconMono`) turn white in the dark appearance; the dropdown sets this on the wrapper. */
+/* Black SVG icons (a choice's `iconMono`) turn white in the dark appearance; on a wrapper if the icon has a filter */
 .dp-icon-mono {
   filter: invert(var(--dp-icon-invert));
 }
