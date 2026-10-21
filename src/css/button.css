@@ -1,5 +1,6 @@
-/* Copy buttons: the new icon (e.g. the check after copying) blends in */
-:is(.copy-button, .copy-page-button) svg {
+/* Copy buttons: the outcome icon (the check after copying, or the cross) blends in. Not the copy icon: @starting-style
+ * also applies whenever its code block is revealed (a choice switch ends its `display: none`), so it would flash. */
+:is(.copy-button, .copy-page-button) svg:not([data-status='idle']) {
   --transition-copy-icon-duration: 200ms;
   transition: opacity var(--transition-copy-icon-duration) var(--dp-ease-out), scale
     var(--transition-copy-icon-duration) var(--dp-ease-out), filter var(--transition-copy-icon-duration)

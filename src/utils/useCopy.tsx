@@ -38,8 +38,9 @@ function CopyAnnouncement({ status }: { status: CopyStatus }) {
 function CopyStatusIcon({ status }: { status: CopyStatus }) {
   return (
     <svg
-      // A new icon blends in (button.css)
+      // The outcome icon blends in (button.css)
       key={status}
+      data-status={status}
       viewBox="0 0 24 24"
       fill="none"
       stroke={
