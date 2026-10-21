@@ -52,8 +52,8 @@ const viewMobile = 450
 const viewTablet = 1016
 // A desktop bar narrower than this has the search as an icon, unless the search is centered (the bar has no `topNavigation` links, the full field fits): the demo's top bar with the full search field needs 1150px (measured with Inter)
 const viewSearchField = 1150
-// Up to this, a fine pointer's search field with its keyboard hint squeezes "Menu" (in the phone bar up to 386px, and in the tablet bar up to 457px): the search is compact
-const viewSearchHint = 460
+// Up to this, the search field squeezes "Menu": with a fine pointer's keyboard hint (in the phone bar up to 386px, and in the tablet bar up to 457px), and in the tablet bar beside a touch device's larger theme toggle (up to 459px, and 463px with the fallback font before Inter loads): the search is compact
+const viewSearchHint = 463
 const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 // 1061 = 760 + 300 + 1
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
 // The frame: left navigation + page content + "On this page", and not wider (the eye doesn't travel far)
@@ -541,15 +541,25 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   style += css`
 @container container-viewport (width <= ${viewSearchHint}px) {
   .nav-head-content .search-box {
-    min-width: 0;
     padding: 0 10px;
   }
   .nav-head-content .search-box-kbd {
     display: none;
   }
 }
+/* The tablet bar has no room for the field's width: the search hugs its label */
+@media (width > ${viewMobile}px) {
+  @container container-viewport (width <= ${viewSearchHint}px) {
+    .nav-head-content .search-box {
+      min-width: 0;
+    }
+  }
+}
 /* The icon alone: narrow phones (the top nav also holds the logo, the theme toggle and the menu) */
 @container container-viewport (width <= 400px) {
+  .nav-head-content .search-box {
+    min-width: 0;
+  }
   .nav-head-content .search-box-text {
     display: none;
   }
