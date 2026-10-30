@@ -436,6 +436,27 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await page.setViewportSize(viewportSize!)
   })
 
+  test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
+    const viewportSize = page.viewportSize()
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(getServerUrl() + featuresURL)
+    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
+    await page.evaluate(() =>
+      window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - 63 - 40),
+    )
+    await autoRetry(
+      async () => {
+        const isCodeBlocksInked = await page.evaluate(() =>
+          document.querySelector('.toc-item[href="#code-blocks"]')!.hasAttribute('data-visible'),
+        )
+        expect(isCodeBlocksInked).toBe(true)
+      },
+      { timeout: 5 * 1000 },
+    )
+    await page.setViewportSize(viewportSize!)
+  })
+
   test('client-side navigation', async () => {
     await page.click('.nav-head a[href="/"]')
     await autoRetry(

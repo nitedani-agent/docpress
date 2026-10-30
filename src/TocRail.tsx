@@ -109,7 +109,7 @@ function useActiveSection(tocItems: { id: string }[], withProgress: boolean) {
       const list = rail?.querySelector<HTMLElement>('.toc-list')
       // Hidden (narrow screens): nothing to show
       if (!rail || !list || rail.getClientRects().length === 0) return
-      const page = measurePage(ids)
+      const page = measurePage(ids, rail)
       let activeIndex = 0
       page.sections.forEach((section, i) => {
         if (section && section.start <= page.line) activeIndex = i
@@ -175,10 +175,11 @@ type Section = { start: number; end: number; onScreen: number }
 type Thumb = { top: number; height: number }
 
 // The sections (null: not rendered, e.g. an unselected choice), the part of the page on screen, and the reading line
-function measurePage(ids: string[]) {
-  // Below the header and the gap a heading jumped to keeps above it (heading.css), plus a px (the jump lands on a whole
-  // px, the heading up to 1px lower): the section above a heading jumped to isn't on screen
-  const viewTop = getStickyOffset() + 17
+function measurePage(ids: string[], rail: HTMLElement) {
+  // Below the sticky header (the rail sticks right below it, also while the category tabs slide away) and the gap a
+  // heading jumped to keeps above it (heading.css), plus a px (the jump lands on a whole px, the heading up to 1px
+  // lower): with the tabs shown, the section above a heading jumped to isn't on screen
+  const viewTop = parseFloat(getComputedStyle(rail).top) + 17
   const viewBottom = window.innerHeight
   // The n-th element with the n-th occurrence of an id (a page can repeat a heading)
   const occurrences = new Map<string, number>()
@@ -259,11 +260,4 @@ function readThumb(list: HTMLElement): Thumb {
 function paintThumb(list: HTMLElement, thumb: Thumb) {
   list.style.setProperty('--thumb-top', `${thumb.top}px`)
   list.style.setProperty('--thumb-height', `${thumb.height}px`)
-}
-
-// The height of the sticky header (the top bar, and the category tabs if any), 0 if it isn't sticky
-function getStickyOffset() {
-  const header = document.querySelector('.doc-page > header')
-  if (!header || getComputedStyle(header).position !== 'sticky') return 0
-  return header.getBoundingClientRect().height
 }
