@@ -20,7 +20,8 @@
 }
 /* Scrolling down slides the tabs under the sticky top bar (CategoryTabs.tsx), unless they have the keyboard focus */
 html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
-  .has-category-tabs {
+  /* Only where the top nav is sticky: elsewhere nothing follows the tabs, and the transition would restyle the page */
+  .has-category-tabs:has(.top-nav-sticky) {
     --nav-tabs-shown-height-end: 0px;
   }
   .top-nav-sticky {
