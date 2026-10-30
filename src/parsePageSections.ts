@@ -35,6 +35,7 @@ function transform(code: string) {
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
   const pageSections: PageSection[] = []
+  const pageSectionIds = new Set<string>()
   let isCodeBlock = false
   const codeNew = code
     .split('\n')
@@ -58,7 +59,11 @@ function extractPageSections(code: string) {
         || line.startsWith('<h2')
         */
       ) {
-        const { pageSectionId, pageSectionLevel, pageSectionTitle, headingHtml } = parsePageSection(line)
+        const { pageSectionId, pageSectionLevel, pageSectionTitle, headingHtml } = parsePageSection(
+          line,
+          pageSectionIds,
+        )
+        if (pageSectionId) pageSectionIds.add(pageSectionId)
         pageSections.push({ pageSectionId, pageSectionLevel, pageSectionTitle })
         return headingHtml
       }
@@ -69,7 +74,7 @@ function extractPageSections(code: string) {
   return { codeNew, pageSections }
 }
 
-function parsePageSection(line: string): PageSection & { headingHtml: string } {
+function parsePageSection(line: string, pageSectionIds: Set<string>): PageSection & { headingHtml: string } {
   const [lineBegin, ...lineWords] = line.split(' ')
   assert(lineBegin!.split('#').join('') === '', { line, lineWords })
   const pageSectionLevel = lineBegin!.length
@@ -79,16 +84,19 @@ function parsePageSection(line: string): PageSection & { headingHtml: string } {
   assert(titleMdx, { line, lineWords })
 
   let pageSectionTitle = titleMdx
-  let anchor = titleMdx
+  let pageSectionId = determineSectionUrlHash(titleMdx)
   {
     // Support custom anchor: `## Some Title{#custom-anchor}`
     const customAnchor = /(?<={#).*(?=})/g.exec(titleMdx)?.[0]
     if (customAnchor) {
-      anchor = customAnchor
+      pageSectionId = determineSectionUrlHash(customAnchor)
       pageSectionTitle = titleMdx.replace(/{#.*}/g, '')
+    } else if (pageSectionId) {
+      // A page may repeat a title: `#some-title`, `#some-title-1`, `#some-title-2`, ... (like GitHub)
+      const idBase = pageSectionId
+      for (let i = 1; pageSectionIds.has(pageSectionId); i++) pageSectionId = `${idBase}-${i}`
     }
   }
-  const pageSectionId = determineSectionUrlHash(anchor)
 
   const titleParsed = parseMarkdownMini(pageSectionTitle)
   assert(pageSectionId === null || pageSectionId.length > 0)
