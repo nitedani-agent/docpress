@@ -1,6 +1,7 @@
 /*
- * Design tokens. A site re-themes by overriding `--dp-*` (on :root or body), and the dark appearance is the `dark` class
- * on <html> (the dark block below).
+ * Design tokens. A site re-themes by overriding `--dp-*` on :root (the shadows and DocSearch's palette are computed
+ * there: an override on body doesn't reach them), and the dark appearance is the `dark` class on <html> (the dark block
+ * below).
  *
  * The `--dp-` prefix keeps the `--color-*` / `--font-*` that hosts' tools (e.g. Tailwind, daisyUI) set on `:root` out
  * of DocPress.
