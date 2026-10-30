@@ -5,8 +5,9 @@
   outline: 2px solid var(--dp-color-primary);
   outline-offset: 2px;
 }
-/* Full-height top bar cells: ring inside, like the menu toggles' */
-.nav-head a:focus-visible:not(.icon-button, .version-badge) {
+/* Full-height cells of the top bar and of the category tabs (their row scrolls sideways: it clips): ring inside, like the menu toggles' */
+.nav-head a:focus-visible:not(.icon-button, .version-badge),
+.category-tab:focus-visible {
   outline-offset: -3px;
   border-radius: var(--dp-radius-md);
 }

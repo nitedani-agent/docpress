@@ -528,6 +528,16 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         },
         { timeout: 5 * 1000 },
       )
+      // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
+      const ring = await page.evaluate(() => {
+        const tab = document.activeElement!
+        const { outlineOffset, outlineWidth } = getComputedStyle(tab)
+        const outset = parseFloat(outlineOffset) + parseFloat(outlineWidth)
+        const tabRect = tab.getBoundingClientRect()
+        const rowRect = tab.closest('.category-tabs-content')!.getBoundingClientRect()
+        return { top: tabRect.top - outset - rowRect.top, bottom: rowRect.bottom - (tabRect.bottom + outset) }
+      })
+      expect(ring.top >= 0 && ring.bottom >= 0).toBe(true)
     })
   })
 
