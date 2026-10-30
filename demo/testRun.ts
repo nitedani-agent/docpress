@@ -485,7 +485,22 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     })
   })
 
-  test(`${featuresURL} - the first category tab's icon under the logo`, async () => {
+  test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon`, async () => {
+    const getLogoLeft = () =>
+      page.evaluate(() => document.querySelector('.nav-head-logo img')!.getBoundingClientRect().left)
+    await withViewport({ width: 1440, height: 900 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      const navLeftTextLeft = await page.evaluate(() => {
+        const range = document.createRange()
+        range.selectNodeContents(document.querySelector('#nav-left .nav-item')!)
+        return range.getBoundingClientRect().left
+      })
+      const logoLeft = await getLogoLeft()
+      expect(logoLeft).toBe(navLeftTextLeft)
+      // The logo doesn't move between pages
+      await page.goto(getServerUrl() + '/')
+      expect(await getLogoLeft()).toBe(logoLeft)
+    })
     // Desktop, too narrow for the left navigation
     await withViewport({ width: 1040, height: 720 }, async () => {
       await page.goto(getServerUrl() + featuresURL)
