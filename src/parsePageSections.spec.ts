@@ -46,4 +46,17 @@ describe('extractPageSections()', () => {
       '[DocPress][Wrong Usage] The headings ## Setup and ### Install have the same URL hash #stable',
     )
   })
+
+  it('accepts the whitespace Markdown accepts around a heading', () => {
+    const { codeNew, pageSections } = extractPageSections(['##  Setup', '##\tSetup', '  ## Setup', '#Setup'].join('\n'))
+    expect(codeNew).toBe(
+      [
+        `<h2 id="setup">{'Setup'}</h2>`,
+        `<h2 id="setup-1">{'Setup'}</h2>`,
+        `  <h2 id="setup-2">{'Setup'}</h2>`,
+        '#Setup',
+      ].join('\n'),
+    )
+    expect(pageSections.map(({ pageSectionTitle }) => pageSectionTitle)).toEqual(['Setup', 'Setup', 'Setup'])
+  })
 })

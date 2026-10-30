@@ -68,13 +68,14 @@ function extractPageSections(code: string) {
       return line
     }
 
-    if (
-      line.startsWith('#')
-      /* TO-DO/eventually: implement.
-      || line.startsWith('<h2')
-      */
-    ) {
-      return parsePageSection(line)
+    /* TO-DO/eventually: implement.
+    || line.startsWith('<h2')
+    */
+    // E.g. `## Some Title`, also with tabs or more spaces after `##`, and indented by up to 3 spaces (CommonMark)
+    const heading = /^( {0,3})(#{1,6})[ \t]+(?=\S)/.exec(line)
+    if (heading) {
+      const [match, indent, hashes] = heading
+      return parsePageSection(indent!, hashes!.length, line.slice(match.length))
     }
 
     return line
@@ -90,17 +91,9 @@ function extractPageSections(code: string) {
   return { codeNew, pageSections }
 }
 
-type Heading = PageSection & { isCustomAnchor: boolean }
+type Heading = PageSection & { isCustomAnchor: boolean; indent: string }
 
-function parsePageSection(line: string): Heading {
-  const [lineBegin, ...lineWords] = line.split(' ')
-  assert(lineBegin!.split('#').join('') === '', { line, lineWords })
-  const pageSectionLevel = lineBegin!.length
-
-  const titleMdx = lineWords.join(' ')
-  assert(!titleMdx.startsWith(' '), { line, lineWords })
-  assert(titleMdx, { line, lineWords })
-
+function parsePageSection(indent: string, pageSectionLevel: number, titleMdx: string): Heading {
   let pageSectionTitle = titleMdx
   let anchor = titleMdx
   {
@@ -114,7 +107,7 @@ function parsePageSection(line: string): Heading {
   const pageSectionId = determineSectionUrlHash(anchor)
   assert(pageSectionId === null || pageSectionId.length > 0)
 
-  return { pageSectionLevel, pageSectionTitle, pageSectionId, isCustomAnchor: anchor !== titleMdx }
+  return { pageSectionLevel, pageSectionTitle, pageSectionId, isCustomAnchor: anchor !== titleMdx, indent }
 }
 
 // A page may repeat a heading title: `#setup`, `#setup-1`, ... (like GitHub). A heading keeps its own id unless a custom
@@ -147,10 +140,10 @@ function makeIdsUnique(headings: Heading[]) {
   })
 }
 
-function getHeadingHtml({ pageSectionLevel, pageSectionTitle, pageSectionId }: Heading): string {
+function getHeadingHtml({ pageSectionLevel, pageSectionTitle, pageSectionId, indent }: Heading): string {
   const titleParsed = parseMarkdownMini(pageSectionTitle)
   const headingId = pageSectionId === null ? '' : ` id="${pageSectionId}"`
-  return `<h${pageSectionLevel}${headingId}>${titleParsed}</h${pageSectionLevel}>`
+  return `${indent}<h${pageSectionLevel}${headingId}>${titleParsed}</h${pageSectionLevel}>`
 }
 
 function parseMarkdownMini(titleMarkdown: string): string {
