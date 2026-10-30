@@ -473,6 +473,48 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     })
   })
 
+  test(`${featuresURL} - category tabs hidden on scroll down, shown on scroll up and on keyboard focus`, async () => {
+    await withViewport({ width: 1440, height: 900 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+      const isHidden = () => page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
+      const scrollTo = (y: number) => page.evaluate((y) => window.scrollTo(0, y), y)
+      await scrollTo(1200)
+      await autoRetry(
+        async () => {
+          expect(await isHidden()).toBe(true)
+          // The strip the tabs leave, 20px below the top bar, is the page's
+          const isStripClickable = await page.evaluate(
+            () => !document.elementFromPoint(700, 63 + 20)!.closest('header'),
+          )
+          expect(isStripClickable).toBe(true)
+        },
+        { timeout: 5 * 1000 },
+      )
+      await scrollTo(1199)
+      await autoRetry(async () => expect(await isHidden()).toBe(false), { timeout: 5 * 1000 })
+      await scrollTo(1500)
+      await autoRetry(async () => expect(await isHidden()).toBe(true), { timeout: 5 * 1000 })
+      // Tabbing from the top bar's last control into the hidden tabs shows them
+      await page.evaluate(() => {
+        const controls = document.querySelectorAll<HTMLElement>('.nav-head :is(a[href], button)')
+        controls[controls.length - 1]!.focus({ preventScroll: true })
+      })
+      await page.keyboard.press('Tab')
+      await autoRetry(
+        async () => {
+          const tab = await page.evaluate(() => ({
+            isFocused: document.activeElement!.matches('.category-tab'),
+            transform: getComputedStyle(document.querySelector('.category-tabs')!).transform,
+          }))
+          expect(tab.isFocused).toBe(true)
+          expect(tab.transform).toBe('none')
+        },
+        { timeout: 5 * 1000 },
+      )
+    })
+  })
+
   test('client-side navigation', async () => {
     await page.click('.nav-head a[href="/"]')
     await autoRetry(
