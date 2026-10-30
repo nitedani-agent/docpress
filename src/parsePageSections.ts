@@ -38,6 +38,15 @@ function extractPageSections(code: string) {
   let codeBlockFence: string | null = null
   let isComment = false
   const lines = code.split('\n').map((line) => {
+    // Skip MDX comments, e.g.
+    // {/*
+    // ## Draft
+    // */}
+    if (isComment) {
+      if (/\*\//.test(line)) isComment = false
+      return line
+    }
+
     // Skip code blocks, e.g.
     // ~~~md
     // # Markdown Example
@@ -56,14 +65,7 @@ function extractPageSections(code: string) {
       return line
     }
 
-    // Skip MDX comments, e.g.
-    // {/*
-    // ## Draft
-    // */}
-    if (isComment) {
-      if (/\*\//.test(line)) isComment = false
-      return line
-    }
+    // A line-start `{/*` without `*/` after it opens a multi-line MDX comment
     if (/^ {0,3}\{\s*\/\*(?!.*\*\/)/.test(line)) {
       isComment = true
       return line

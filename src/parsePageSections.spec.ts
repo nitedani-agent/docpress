@@ -40,6 +40,9 @@ describe('extractPageSections()', () => {
       '### Setup',
       '*/',
       '}',
+      '{/*',
+      '  ```md',
+      '*/}',
       '{/* note */ <span>x</span>}',
       'Use `{/*` to start an MDX comment.',
     ]
