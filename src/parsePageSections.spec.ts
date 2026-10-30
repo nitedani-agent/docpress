@@ -28,10 +28,19 @@ describe('extractPageSections', () => {
   })
 
   it('supports custom anchors', () => {
-    const { pageSections } = extractPageSections(['## Setup {#custom}', '## Some Title{#custom-anchor}'].join('\n'))
+    const { pageSections } = extractPageSections(
+      [
+        '## Setup {#custom}',
+        '## Some Title{#custom-anchor}',
+        '## 简体中文{#chinese}',
+        '## `{#tag}` and `{other}`',
+      ].join('\n'),
+    )
     expect(pageSections).toEqual([
       { pageSectionId: 'custom', pageSectionLevel: 2, pageSectionTitle: 'Setup' },
       { pageSectionId: 'custom-anchor', pageSectionLevel: 2, pageSectionTitle: 'Some Title' },
+      { pageSectionId: 'chinese', pageSectionLevel: 2, pageSectionTitle: '简体中文' },
+      { pageSectionId: 'tag-and-other', pageSectionLevel: 2, pageSectionTitle: '`{#tag}` and `{other}`' },
     ])
   })
 

@@ -85,10 +85,10 @@ function parsePageSection(line: string): (PageSection & { headingHtml: string })
   let anchor = titleMdx
   {
     // Support custom anchor: `## Some Title{#custom-anchor}`
-    const customAnchor = /(?<={#).*(?=})/g.exec(titleMdx)?.[0]
+    const customAnchor = /(?<={#)[^}]*(?=}$)/.exec(titleMdx)?.[0]
     if (customAnchor) {
       anchor = customAnchor
-      pageSectionTitle = titleMdx.replace(/[ \t]*{#.*}/g, '')
+      pageSectionTitle = titleMdx.replace(/[ \t]*{#[^}]*}$/, '')
     }
   }
   const pageSectionId = determineSectionUrlHash(anchor)
