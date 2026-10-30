@@ -45,9 +45,20 @@ function transform(code: string) {
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
   // DocPress replaces a heading's text (and its custom anchor `{#some-hash}`) by a string: MDX never parses its `{` and `<`
-  const codeMdx = code.replace(/^( {0,3}#{1,6}[ \t])(.*)/gm, (_, start, title) => start + title.replace(/[{<]/g, ' '))
+  const blank = (pattern: RegExp) =>
+    code.replace(
+      /^( {0,3}#{1,6}[ \t])(.*)/gm,
+      (_, start, title) => start + title.replace(pattern, (s) => ' '.repeat(s.length)),
+    )
+  let tree
+  try {
+    tree = mdxProcessor.parse(blank(/[{<]/g))
+  } catch {
+    // A `#` line in JSX text inside JavaScript isn't a heading: blanking its `{` and `<` breaks its JSX
+    tree = mdxProcessor.parse(blank(/{#.*}/g))
+  }
   const headingLines = new Set<number>()
-  visit(mdxProcessor.parse(codeMdx), 'heading', (node) => {
+  visit(tree, 'heading', (node) => {
     headingLines.add(node.position!.start.line - 1)
   })
   const lines = code.split('\n').map((line, i) => {
