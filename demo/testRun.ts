@@ -428,11 +428,13 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
 
   test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon, and doesn't move between pages`, async () => {
     const getLogoLeft = () =>
-      page.evaluate(() => document.querySelector('.nav-head-logo img')!.getBoundingClientRect().left)
+      page.evaluate(() => document.querySelector('.nav-head-logo img')?.getBoundingClientRect().left ?? null)
     await open(featuresURL, 'desktop')
     const navLeftTextLeft = await page.evaluate(() => {
+      const navItem = document.querySelector('#nav-left .nav-item')
+      if (!navItem) return null
       const range = document.createRange()
-      range.selectNodeContents(document.querySelector('#nav-left .nav-item')!)
+      range.selectNodeContents(navItem)
       return range.getBoundingClientRect().left
     })
     const logoLeft = await getLogoLeft()
@@ -442,7 +444,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(await getLogoLeft()).toBe(logoLeft)
     await open(featuresURL, 'desktopNarrow')
     const left = await page.evaluate(() => {
-      const getLeft = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().left
+      const getLeft = (selector: string) => document.querySelector(selector)?.getBoundingClientRect().left ?? null
       return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
     })
     expect(left.icon).toBe(left.logo)
@@ -479,8 +481,8 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await page.click('.toc-item[href="#diff"]')
     await autoRetry(
       async () => {
-        const firstInked = await page.evaluate(() =>
-          document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
+        const firstInked = await page.evaluate(
+          () => document.querySelector('.toc-item[data-visible]')?.getAttribute('href') ?? null,
         )
         expect(firstInked).toBe('#diff')
       },
@@ -520,11 +522,13 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await open(featuresURL, 'desktop')
     await scrollTo(1500)
     await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(true), { timeout: 5 * 1000 })
-    // From the top bar's last control
-    await page.evaluate(() => {
+    const isLastControlFocused = await page.evaluate(() => {
       const controls = document.querySelectorAll<HTMLElement>('.nav-head :is(a[href], button)')
-      controls[controls.length - 1]!.focus({ preventScroll: true })
+      const lastControl = controls[controls.length - 1]
+      lastControl?.focus({ preventScroll: true })
+      return !!lastControl && document.activeElement === lastControl
     })
+    expect(isLastControlFocused).toBe(true)
     await page.keyboard.press('Tab')
     await autoRetry(
       async () => {
@@ -589,25 +593,27 @@ async function openWithKeyboard(focused: string) {
   await page.keyboard.press('Enter')
   await autoRetry(
     async () => {
-      const isOpen = await page.evaluate(
-        (focused) =>
-          document.documentElement.classList.contains('menu-modal-show') &&
-          document.activeElement === document.querySelector(focused),
+      const menu = await page.evaluate(
+        (focused) => ({
+          isOpen: document.documentElement.classList.contains('menu-modal-show'),
+          isFocused: document.activeElement === document.querySelector(focused),
+        }),
         focused,
       )
-      expect(isOpen).toBe(true)
+      expect(menu.isOpen).toBe(true)
+      expect(menu.isFocused).toBe(true)
     },
     { timeout: 5 * 1000 },
   )
   await page.keyboard.press('Escape')
   await autoRetry(
     async () => {
-      const isClosed = await page.evaluate(
-        () =>
-          !document.documentElement.classList.contains('menu-modal-show') &&
-          document.activeElement === document.querySelector('.menu-toggle-0'),
-      )
-      expect(isClosed).toBe(true)
+      const menu = await page.evaluate(() => ({
+        isOpen: document.documentElement.classList.contains('menu-modal-show'),
+        isToggleFocused: document.activeElement === document.querySelector('.menu-toggle-0'),
+      }))
+      expect(menu.isOpen).toBe(false)
+      expect(menu.isToggleFocused).toBe(true)
     },
     { timeout: 5 * 1000 },
   )
