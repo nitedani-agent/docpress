@@ -381,22 +381,16 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     const closeButton = '#menu-modal-wrapper .menu-modal-close'
     // The "Docs" menu: on desktop, beside the left navigation, the category tabs replace it
     // Desktop too narrow for the left navigation: the dropdown's first link gets the focus
-    await withViewport({ width: 1040, height: 720 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-      await openWithKeyboard('#menu-navigation-0 a[href]')
-    })
-    await withViewport({ width: 800, height: 720 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-      // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
-      await openWithKeyboard(closeButton)
-      await openWithKeyboard(closeButton)
-      // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
-      await page.evaluate(() => window.scrollTo(0, 400))
-      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-      await openWithKeyboard(closeButton)
-    })
+    await open(featuresURL, 'desktopNarrow')
+    await openWithKeyboard('#menu-navigation-0 a[href]')
+    await open(featuresURL, 'tablet')
+    // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
+    await openWithKeyboard(closeButton)
+    await openWithKeyboard(closeButton)
+    // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
+    await page.evaluate(() => window.scrollTo(0, 400))
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await openWithKeyboard(closeButton)
     async function openWithKeyboard(focused: string) {
       await page.focus('.menu-toggle-0')
       await page.keyboard.press('Enter')
@@ -428,22 +422,19 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - "Docs" menu wherever the left navigation is hidden`, async () => {
-    const isMenuToggleShown = (url: string, width: number) =>
-      withViewport({ width, height: 720 }, async () => {
-        await page.goto(getServerUrl() + url)
-        return await page.isVisible('.menu-toggle-0')
-      })
-    // Desktop, too narrow for the left navigation
-    expect(await isMenuToggleShown(featuresURL, 1040)).toBe(true)
+    const isMenuToggleShown = async (url: string, viewport: Viewport) => {
+      await open(url, viewport)
+      return await page.isVisible('.menu-toggle-0')
+    }
+    expect(await isMenuToggleShown(featuresURL, 'desktopNarrow')).toBe(true)
     // Beside the left navigation, the category tabs replace it
-    expect(await isMenuToggleShown(featuresURL, 1366)).toBe(false)
+    expect(await isMenuToggleShown(featuresURL, 'desktop')).toBe(false)
     // `hideMenuLeft`
-    expect(await isMenuToggleShown('/tiny', 1366)).toBe(true)
+    expect(await isMenuToggleShown('/tiny', 'desktop')).toBe(true)
   })
 
   test(`${featuresURL} - "Skip to content" focused on a scrolled page`, async () => {
-    await page.goto(getServerUrl() + featuresURL)
-    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    await open(featuresURL, 'desktop')
     await page.evaluate(() => window.scrollTo(0, 800))
     await page.keyboard.press('Tab')
     // The page isn't scrolled back to the top to show it
@@ -456,135 +447,118 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - the "Menu" toggle's focus ring isn't cut off (phone)`, async () => {
-    await withViewport({ width: 390, height: 844 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.focus('.nav-head-menu-toggle')
-      await expectWholeFocusRing('.nav-head-menu-toggle .text-menu')
-    })
+    await open(featuresURL, 'phone')
+    await page.focus('.nav-head-menu-toggle')
+    await expectWholeFocusRing('.nav-head-menu-toggle .text-menu')
   })
 
   test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon`, async () => {
     const getLogoLeft = () =>
       page.evaluate(() => document.querySelector('.nav-head-logo img')!.getBoundingClientRect().left)
-    await withViewport({ width: 1440, height: 900 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      const navLeftTextLeft = await page.evaluate(() => {
-        const range = document.createRange()
-        range.selectNodeContents(document.querySelector('#nav-left .nav-item')!)
-        return range.getBoundingClientRect().left
-      })
-      const logoLeft = await getLogoLeft()
-      expect(logoLeft).toBe(navLeftTextLeft)
-      // The logo doesn't move between pages
-      await page.goto(getServerUrl() + '/')
-      expect(await getLogoLeft()).toBe(logoLeft)
+    await open(featuresURL, 'desktop')
+    const navLeftTextLeft = await page.evaluate(() => {
+      const range = document.createRange()
+      range.selectNodeContents(document.querySelector('#nav-left .nav-item')!)
+      return range.getBoundingClientRect().left
     })
-    // Desktop, too narrow for the left navigation
-    await withViewport({ width: 1040, height: 720 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      const left = await page.evaluate(() => {
-        const getLeft = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().left
-        return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
-      })
-      expect(left.icon).toBe(left.logo)
+    const logoLeft = await getLogoLeft()
+    expect(logoLeft).toBe(navLeftTextLeft)
+    // The logo doesn't move between pages
+    await open(landingPageUrl, 'desktop')
+    expect(await getLogoLeft()).toBe(logoLeft)
+    await open(featuresURL, 'desktopNarrow')
+    const left = await page.evaluate(() => {
+      const getLeft = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().left
+      return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
     })
+    expect(left.icon).toBe(left.logo)
   })
 
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
-    await withViewport({ width: 1440, height: 900 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-      // A slide that outlasts the scroll: the rail is measured from where it ends up
-      await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
-      // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
-      const navHeadHeight = await getNavHeadHeight()
-      await page.evaluate(
-        (navHeadHeight) =>
-          window.scrollTo(
-            0,
-            document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - navHeadHeight - 40,
-          ),
-        navHeadHeight,
-      )
-      await autoRetry(
-        async () => {
-          const isCodeBlocksInked = await page.evaluate(() =>
-            document.querySelector('.toc-item[href="#code-blocks"]')!.hasAttribute('data-visible'),
-          )
-          expect(isCodeBlocksInked).toBe(true)
-        },
-        { timeout: 5 * 1000 },
-      )
-    })
+    await open(featuresURL, 'desktop')
+    // A slide that outlasts the scroll: the rail is measured from where it ends up
+    await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
+    // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
+    const navHeadHeight = await getNavHeadHeight()
+    await page.evaluate(
+      (navHeadHeight) =>
+        window.scrollTo(
+          0,
+          document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - navHeadHeight - 40,
+        ),
+      navHeadHeight,
+    )
+    await autoRetry(
+      async () => {
+        const isCodeBlocksInked = await page.evaluate(() =>
+          document.querySelector('.toc-item[href="#code-blocks"]')!.hasAttribute('data-visible'),
+        )
+        expect(isCodeBlocksInked).toBe(true)
+      },
+      { timeout: 5 * 1000 },
+    )
   })
 
   test(`${featuresURL} - "On this page" after a jump down`, async () => {
-    await withViewport({ width: 1440, height: 900 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-      // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
-      await page.click('.toc-item[href="#diff"]')
-      await autoRetry(
-        async () => {
-          const firstInked = await page.evaluate(() =>
-            document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
-          )
-          expect(firstInked).toBe('#diff')
-        },
-        { timeout: 5 * 1000 },
-      )
-    })
+    await open(featuresURL, 'desktop')
+    // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
+    await page.click('.toc-item[href="#diff"]')
+    await autoRetry(
+      async () => {
+        const firstInked = await page.evaluate(() =>
+          document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
+        )
+        expect(firstInked).toBe('#diff')
+      },
+      { timeout: 5 * 1000 },
+    )
   })
 
   test(`${featuresURL} - category tabs hidden on scroll down, shown on scroll up and on keyboard focus`, async () => {
-    await withViewport({ width: 1440, height: 900 }, async () => {
-      await page.goto(getServerUrl() + featuresURL)
-      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-      const isHidden = () => page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
-      const scrollTo = (y: number) => page.evaluate((y) => window.scrollTo(0, y), y)
-      const navHeadHeight = await getNavHeadHeight()
-      await scrollTo(1200)
-      await autoRetry(
-        async () => {
-          expect(await isHidden()).toBe(true)
-          // The strip the tabs leave, 20px below the top bar, is the page's
-          const isStripClickable = await page.evaluate(
-            (y) => !document.elementFromPoint(700, y)!.closest('header'),
-            navHeadHeight + 20,
-          )
-          expect(isStripClickable).toBe(true)
-        },
-        { timeout: 5 * 1000 },
-      )
-      await scrollTo(1199)
-      await autoRetry(async () => expect(await isHidden()).toBe(false), { timeout: 5 * 1000 })
-      await scrollTo(1500)
-      await autoRetry(async () => expect(await isHidden()).toBe(true), { timeout: 5 * 1000 })
-      // Tabbing from the top bar's last control into the hidden tabs shows them
-      await page.evaluate(() => {
-        const controls = document.querySelectorAll<HTMLElement>('.nav-head :is(a[href], button)')
-        controls[controls.length - 1]!.focus({ preventScroll: true })
-      })
-      await page.keyboard.press('Tab')
-      await autoRetry(
-        async () => {
-          const tab = await page.evaluate(() => ({
-            isFocused: document.activeElement!.matches('.category-tab'),
-            transform: getComputedStyle(document.querySelector('.category-tabs')!).transform,
-          }))
-          expect(tab.isFocused).toBe(true)
-          expect(tab.transform).toBe('none')
-        },
-        { timeout: 5 * 1000 },
-      )
-      // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
-      await expectWholeFocusRing('.category-tab:focus')
+    await open(featuresURL, 'desktop')
+    const isHidden = () => page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
+    const scrollTo = (y: number) => page.evaluate((y) => window.scrollTo(0, y), y)
+    const navHeadHeight = await getNavHeadHeight()
+    await scrollTo(1200)
+    await autoRetry(
+      async () => {
+        expect(await isHidden()).toBe(true)
+        // The strip the tabs leave, 20px below the top bar, is the page's
+        const isStripClickable = await page.evaluate(
+          (y) => !document.elementFromPoint(700, y)!.closest('header'),
+          navHeadHeight + 20,
+        )
+        expect(isStripClickable).toBe(true)
+      },
+      { timeout: 5 * 1000 },
+    )
+    await scrollTo(1199)
+    await autoRetry(async () => expect(await isHidden()).toBe(false), { timeout: 5 * 1000 })
+    await scrollTo(1500)
+    await autoRetry(async () => expect(await isHidden()).toBe(true), { timeout: 5 * 1000 })
+    // Tabbing from the top bar's last control into the hidden tabs shows them
+    await page.evaluate(() => {
+      const controls = document.querySelectorAll<HTMLElement>('.nav-head :is(a[href], button)')
+      controls[controls.length - 1]!.focus({ preventScroll: true })
     })
+    await page.keyboard.press('Tab')
+    await autoRetry(
+      async () => {
+        const tab = await page.evaluate(() => ({
+          isFocused: document.activeElement!.matches('.category-tab'),
+          transform: getComputedStyle(document.querySelector('.category-tabs')!).transform,
+        }))
+        expect(tab.isFocused).toBe(true)
+        expect(tab.transform).toBe('none')
+      },
+      { timeout: 5 * 1000 },
+    )
+    // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
+    await expectWholeFocusRing('.category-tab:focus')
   })
 
   test('client-side navigation', async () => {
-    await page.goto(getServerUrl() + orphanURL)
-    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    await open(orphanURL, 'desktop')
     await page.click('.nav-head a[href="/"]')
     await autoRetry(
       async () => {
@@ -613,12 +587,18 @@ function expectAlgoliaCategory(html: string, category: string, order: number) {
 }
 
 type Page = typeof page
-async function withViewport<T>(size: { width: number; height: number }, fn: () => Promise<T>): Promise<T> {
-  const sizeBefore = page.viewportSize()!
-  await page.setViewportSize(size)
-  const result = await fn()
-  await page.setViewportSize(sizeBefore)
-  return result
+const viewports = {
+  phone: { width: 390, height: 844 },
+  tablet: { width: 800, height: 720 },
+  // Between `viewTablet` (1016) and `viewDesktop` (1061): a desktop too narrow for the left navigation
+  desktopNarrow: { width: 1040, height: 720 },
+  desktop: { width: 1440, height: 900 },
+}
+type Viewport = keyof typeof viewports
+async function open(url: string, viewport: Viewport) {
+  await page.setViewportSize(viewports[viewport])
+  await page.goto(getServerUrl() + url)
+  await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
 }
 async function getNavHeadHeight(): Promise<number> {
   const navHeadHeight = await page.evaluate(() =>
