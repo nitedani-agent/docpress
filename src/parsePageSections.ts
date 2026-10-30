@@ -12,10 +12,15 @@ import { createProcessor } from '@mdx-js/mdx'
 import remarkGfm from 'remark-gfm'
 import remarkDirective from 'remark-directive'
 import { visit } from 'unist-util-visit'
+import type { Processor } from 'unified'
 
-// The remark plugins that extend MDX's syntax, so that a page is parsed here as MDX parses it
 const remarkPluginsSyntax = [remarkGfm, remarkDirective]
-const mdxProcessor = createProcessor({ remarkPlugins: remarkPluginsSyntax })
+// Which lines are headings is block structure: DocPress renders a heading's text itself, so MDX's inline syntax is left out
+function remarkBlocksOnly(this: Processor) {
+  const data = this.data() as { micromarkExtensions: { text?: unknown }[] }
+  data.micromarkExtensions = data.micromarkExtensions.map(({ text, ...extension }) => extension)
+}
+const mdxProcessor = createProcessor({ remarkPlugins: [...remarkPluginsSyntax, remarkBlocksOnly] })
 
 type PageSection = {
   pageSectionTitle: string
@@ -44,19 +49,7 @@ function transform(code: string) {
 
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
-  // DocPress replaces a heading's text (and its custom anchor `{#some-hash}`) by a string: MDX never parses its `{` and `<`
-  const blank = (pattern: RegExp) =>
-    code.replace(
-      /^( {0,3}#{1,6}[ \t])(.*)/gm,
-      (_, start, title) => start + title.replace(pattern, (s) => ' '.repeat(s.length)),
-    )
-  let tree
-  try {
-    tree = mdxProcessor.parse(blank(/[{<]/g))
-  } catch {
-    // A `#` line in JSX text inside JavaScript isn't a heading: blanking its `{` and `<` breaks its JSX
-    tree = mdxProcessor.parse(blank(/{#.*}/g))
-  }
+  const tree = mdxProcessor.parse(code)
   const headingLines = new Set<number>()
   visit(tree, 'heading', (node) => {
     headingLines.add(node.position!.start.line - 1)

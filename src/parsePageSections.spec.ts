@@ -26,6 +26,7 @@ describe('extractPageSections()', () => {
     expect(
       getIds(['## The <head> tag', '## Using <Link>', '## Option {a: 1}', '## a <= b', '## Title {#broken']),
     ).toEqual(['the-head-tag', 'using-link', 'option-a-1', 'a-b', 'title-broken'])
+    expect(getIds(['## The <head> tag', '{true && <div>', '# Step <b>1</b>', '</div>}'])).toEqual(['the-head-tag'])
   })
 
   it('skips code blocks and MDX comments', () => {
