@@ -3,6 +3,7 @@ export { setApplePlatform_SSR }
 
 import React from 'react'
 import { openDocsearchModal } from './toggleDocsearchModal.js'
+import { cls } from '../utils/cls.js'
 import './SearchLink.css'
 
 type PropsAnchor = React.HTMLProps<HTMLAnchorElement>
@@ -11,7 +12,7 @@ function SearchLink({ label = 'Search', ...props }: PropsAnchor & { label?: stri
   return (
     <a
       {...props}
-      className={['search-link', props.className].filter(Boolean).join(' ')}
+      className={cls(['search-link', props.className])}
       onClick={(ev) => {
         ev.preventDefault()
         openDocsearchModal()
