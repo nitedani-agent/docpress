@@ -1,8 +1,21 @@
 /* CategoryTabs.tsx: shown on desktop, see Layout.tsx */
+/* The tabs' height below the top bar, followed by the sticky left navigation and "On this page" (Layout.tsx) */
+@property --nav-tabs-shown-height {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+.has-category-tabs {
+  --nav-tabs-shown-height: var(--nav-tabs-height, 0px);
+  transition: --nav-tabs-shown-height var(--dp-duration-reveal) var(--dp-ease-out);
+}
 .category-tabs {
   position: relative;
+  /* Painted below the top bar: scrolling down slides the tabs up under it (Layout.tsx) */
+  z-index: -1;
   height: var(--nav-tabs-height);
   background: var(--dp-color-bg);
+  transition: transform var(--dp-duration-reveal) var(--dp-ease-out);
 }
 .category-tabs-content {
   display: flex;
@@ -12,6 +25,7 @@
   padding: 0 var(--main-view-padding) 0 calc(var(--nav-indent) - 10px);
   overflow-x: auto;
   scrollbar-width: none;
+  transition: opacity var(--dp-duration-reveal) var(--dp-ease-out);
 }
 .category-tab {
   position: relative;

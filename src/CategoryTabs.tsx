@@ -1,4 +1,5 @@
 export { CategoryTabs }
+export { initCategoryTabsHiding }
 
 import React from 'react'
 import { usePageContext } from './renderer/usePageContext.js'
@@ -36,5 +37,20 @@ function CategoryTabs() {
         )}
       </div>
     </nav>
+  )
+}
+
+// Any scroll down hides the tabs, any scroll up shows them (where the top nav is sticky, see Layout.tsx)
+function initCategoryTabsHiding() {
+  let scrollYLast = window.scrollY
+  window.addEventListener(
+    'scroll',
+    () => {
+      const { scrollY } = window
+      if (scrollY === scrollYLast) return
+      document.documentElement.classList.toggle('category-tabs-hidden', scrollY > 0 && scrollY > scrollYLast)
+      scrollYLast = scrollY
+    },
+    { passive: true },
   )
 }

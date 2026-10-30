@@ -58,12 +58,13 @@ const viewDesktop = (mainViewWidthMax + navLeftWidthMin + blockMargin) as 1061 /
 const viewDesktopLarge = (mainViewWidthMax + navLeftWidthMax + blockMargin) as 1131 // 1131 = 760 + 370 + 1
 // The frame: left navigation + page content + "On this page", and not wider (the eye doesn't travel far)
 const bodyMaxWidth = 1340
-// A bar (the top nav, the category tabs): the bottom hairline, and copies of the bar left and right of it, so that it
-// spans the viewport also beyond `bodyMaxWidth`
+// A bar (the top nav, the category tabs): copies of the bar left and right of it, so that it spans the viewport also
+// beyond `bodyMaxWidth`
+const barShadowSides = `-${bodyMaxWidth}px 0 0 var(--dp-color-bg), ${bodyMaxWidth}px 0 0 var(--dp-color-bg)`
+// ... and the bottom hairline
 const barShadow = [
   `0 ${blockMargin}px 0 var(--dp-color-border)`,
-  `-${bodyMaxWidth}px 0 0 var(--dp-color-bg)`,
-  `${bodyMaxWidth}px 0 0 var(--dp-color-bg)`,
+  barShadowSides,
   `-${bodyMaxWidth}px ${blockMargin}px 0 var(--dp-color-border)`,
   `${bodyMaxWidth}px ${blockMargin}px 0 var(--dp-color-border)`,
 ].join(', ')
@@ -101,10 +102,14 @@ function Layout({ children }: { children: React.ReactNode }) {
       style={{
         ['--block-margin']: `${blockMargin}px`,
         ['--nav-head-height']: `${navHeadHeight}px`,
-        // Offset for elements sitting below the sticky top nav
+        // Offset for jumps and focus below the sticky top nav, clear of the category tabs that scrolling up brings back
         // (The category tabs' height, see getStyleLayout())
         ['--nav-head-sticky-offset']: isTopNavSticky
           ? 'calc(var(--nav-head-height) + var(--nav-tabs-height, 0px))'
+          : '0px',
+        // Offset for sticky elements below the top nav: it follows the category tabs as they slide (CategoryTabs.css)
+        ['--nav-head-sticky-top']: isTopNavSticky
+          ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height))'
           : '0px',
         ['--main-view-padding']: `${mainViewPadding}px`,
         // We don't add `container` to `body` nor `html` beacuse in Firefox it breaks the `position: fixed` of <MenuModal>
@@ -116,10 +121,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     >
       {/* Before the markup it styles: the first paint has the right layout */}
       <Style>{getStyleLayout(isNavLeftAlwaysHidden)}</Style>
-      {/* Focused elements aren't hidden under the sticky top nav (for headings, see heading.css) */}
-      {isTopNavSticky && (
-        <Style>{`:where(a, button, input, select, textarea, summary, [tabindex]):focus { scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px); }`}</Style>
-      )}
+      {isTopNavSticky && <Style>{getStyleTopNavSticky()}</Style>}
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -291,7 +293,7 @@ function NavLeft() {
           style={{
             position: 'sticky',
             // Sit below the sticky top nav (or at the very top when the top nav isn't sticky)
-            top: 'var(--nav-head-sticky-offset)',
+            top: 'var(--nav-head-sticky-top)',
           }}
         >
           <div
@@ -299,7 +301,7 @@ function NavLeft() {
             className="scroll-fade"
             style={{
               top: 0,
-              height: `calc(100vh - var(--nav-head-sticky-offset) - var(--block-margin))`,
+              height: `calc(100vh - var(--nav-head-sticky-top) - var(--block-margin))`,
               overflowY: 'auto',
               overscrollBehavior: 'contain',
               paddingBottom: 40,
@@ -392,7 +394,6 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
       style={{
         backgroundColor: 'var(--dp-color-bg)',
         position: 'relative',
-        boxShadow: barShadow,
       }}
     >
       <div
@@ -431,11 +432,40 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
     </nav>
   )
 }
+function getStyleTopNavSticky() {
+  return css`
+/* Focused elements aren't hidden under the sticky top nav (for headings, see heading.css) */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus {
+  scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px);
+}
+/* Scrolling down slides the category tabs under the top bar (CategoryTabs.tsx), unless they have the keyboard focus */
+html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
+  .has-category-tabs {
+    --nav-tabs-shown-height: 0px;
+  }
+  .category-tabs {
+    transform: translateY(-100%);
+  }
+  .category-tabs-content {
+    opacity: 0;
+  }
+  /* The strip the tabs leave lets the pointer through to the page */
+  .doc-page > header {
+    pointer-events: none;
+    & > * {
+      pointer-events: auto;
+    }
+  }
+}`
+}
 function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   let style = ''
 
   // The top bar
   style += css`
+.nav-head {
+  box-shadow: ${barShadow};
+}
 .nav-head-content {
   display: flex;
 }
@@ -630,6 +660,10 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   /* Category tabs (CategoryTabs.tsx) */
   .has-category-tabs {
     --nav-tabs-height: 44px;
+    /* The tabs have the hairline, also when they slide up under the bar */
+    .nav-head {
+      box-shadow: ${barShadowSides};
+    }
   }
   .nav-head-content-search-centered {
     display: grid;
