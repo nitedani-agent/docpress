@@ -40,4 +40,10 @@ describe('extractPageSections()', () => {
     expect(codeNew).toBe([...lines, `<h2 id="setup">{'Setup'}</h2>`].join('\n'))
     expect(pageSections).toEqual([{ pageSectionId: 'setup', pageSectionLevel: 2, pageSectionTitle: 'Setup' }])
   })
+
+  it('throws a usage error upon two headings with the same custom anchor', () => {
+    expect(() => extractPageSections(['## Setup{#stable}', '### Install{#stable}'].join('\n'))).toThrow(
+      '[DocPress][Wrong Usage] The headings ## Setup and ### Install have the same URL hash #stable',
+    )
+  })
 })

@@ -3,9 +3,10 @@ export { extractPageSections }
 export type { PageSection }
 
 import type { PluginOption } from 'vite'
-import { assert } from './utils/assert.js'
+import { assert, assertUsage } from './utils/assert.js'
 import { determineSectionUrlHash } from './utils/determineSectionUrlHash.js'
 import os from 'os'
+import pc from '@brillout/picocolors'
 
 type PageSection = {
   pageSectionTitle: string
@@ -120,7 +121,18 @@ function parsePageSection(line: string): Heading {
 // anchor or an earlier heading has it, and a suffix never takes another heading's own id.
 function makeIdsUnique(headings: Heading[]) {
   const idsOwn = new Set(headings.map((heading) => heading.pageSectionId))
-  const idsTaken = new Set(headings.filter((heading) => heading.isCustomAnchor).map((heading) => heading.pageSectionId))
+  const idsTaken = new Set<string>()
+  headings.forEach((heading) => {
+    const id = heading.pageSectionId
+    if (!heading.isCustomAnchor || id === null) return
+    const first = headings.find((h) => h.isCustomAnchor && h.pageSectionId === id)!
+    const getMdx = (h: Heading) => pc.bold(`${'#'.repeat(h.pageSectionLevel)} ${h.pageSectionTitle}`)
+    assertUsage(
+      first === heading,
+      `The headings ${getMdx(first)} and ${getMdx(heading)} have the same URL hash ${pc.bold(`#${id}`)}, give them different {#custom-anchor}`,
+    )
+    idsTaken.add(id)
+  })
   headings.forEach((heading) => {
     const idBase = heading.pageSectionId
     if (idBase === null || heading.isCustomAnchor) return
