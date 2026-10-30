@@ -40,7 +40,7 @@ function CategoryTabs() {
   )
 }
 
-// Any scroll down hides the tabs, any scroll up shows them (where the top nav is sticky, see Layout.tsx)
+// Any scroll down hides the tabs, any scroll up shows them (only where the top nav is sticky, see CategoryTabs.css)
 function initCategoryTabsHiding() {
   let scrollYLast = window.scrollY
   window.addEventListener(
