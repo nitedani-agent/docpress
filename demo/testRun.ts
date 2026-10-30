@@ -454,15 +454,15 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await open(featuresURL, 'desktop')
     // A slide that outlasts the scroll: the rail is measured from where it ends up
     await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
-    // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
-    const navHeadHeight = await getNavHeadHeight()
+    // Scrolled down (the tabs slide away) until the "Code blocks" section ends in the middle of the strip they leave
+    const stripMiddle = (await getCssPx('--nav-head-height')) + (await getCssPx('--nav-tabs-height')) / 2
     await page.evaluate(
-      (navHeadHeight) =>
+      (stripMiddle) =>
         window.scrollTo(
           0,
-          document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - navHeadHeight - 40,
+          document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - stripMiddle,
         ),
-      navHeadHeight,
+      stripMiddle,
     )
     await autoRetry(
       async () => {
@@ -502,15 +502,15 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
 
   test(`${featuresURL} - the strip the hidden category tabs leave takes clicks`, async () => {
     await open(featuresURL, 'desktop')
-    const navHeadHeight = await getNavHeadHeight()
+    const stripMiddle = (await getCssPx('--nav-head-height')) + (await getCssPx('--nav-tabs-height')) / 2
     await scrollTo(1200)
     await autoRetry(
       async () => {
         expect(await isCategoryTabsHidden()).toBe(true)
-        // 20px below the top bar: the page, not the header
+        // The page, not the header
         const isStripClickable = await page.evaluate(
           (y) => !document.elementFromPoint(700, y)!.closest('header'),
-          navHeadHeight + 20,
+          stripMiddle,
         )
         expect(isStripClickable).toBe(true)
       },
@@ -624,12 +624,14 @@ async function scrollTo(y: number) {
 async function isCategoryTabsHidden() {
   return await page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
 }
-async function getNavHeadHeight(): Promise<number> {
-  const navHeadHeight = await page.evaluate(() =>
-    parseFloat(getComputedStyle(document.querySelector('.nav-head')!).getPropertyValue('--nav-head-height')),
+// A length custom property, as the top bar reads it (e.g. `--nav-head-height`)
+async function getCssPx(name: string): Promise<number> {
+  const px = await page.evaluate(
+    (name) => parseFloat(getComputedStyle(document.querySelector('.nav-head')!).getPropertyValue(name)),
+    name,
   )
-  expect(navHeadHeight > 0).toBe(true)
-  return navHeadHeight
+  expect(px > 0).toBe(true)
+  return px
 }
 // The focus ring of `selector` is drawn and no ancestor's overflow cuts it off (`clip-path` and `contain` aren't checked)
 async function expectWholeFocusRing(selector: string) {
