@@ -64,7 +64,7 @@ function NoteGeneric({
   return (
     <blockquote className={className} style={style}>
       {iconResolved && (
-        <span className="callout-icon" aria-hidden="true">
+        <span className={cls(['callout-icon', !!icon && 'callout-icon-custom'])} aria-hidden="true">
           {iconResolved}
         </span>
       )}

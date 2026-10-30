@@ -63,6 +63,14 @@
   justify-content: center;
   color: var(--note-color);
 }
+/* A site's own icon (<NoteWithCustomIcon>, e.g. an emoji): in the first line of text, as an inline element (an image
+   may offset itself within that line) */
+.callout-icon-custom {
+  display: block;
+  width: auto;
+  min-width: 18px;
+  text-align: center;
+}
 .doc-page blockquote:not(.callout)::before {
   content: '';
   background-color: var(--note-color);
