@@ -74,7 +74,8 @@ function parsePageSection(line: string): PageSection & { headingHtml: string } {
   assert(lineBegin!.split('#').join('') === '', { line, lineWords })
   const pageSectionLevel = lineBegin!.length
 
-  const titleMdx = lineWords.join(' ')
+  // Remove the optional closing sequence: `## Some Title ##` => `Some Title`
+  const titleMdx = lineWords.join(' ').replace(/[ \t]+#+[ \t]*$/, '')
   assert(!titleMdx.startsWith(' '), { line, lineWords })
   assert(titleMdx, { line, lineWords })
 
