@@ -30,7 +30,8 @@
   }
 }
 .skip-link {
-  position: absolute;
+  /* Shown where the reader is: focusing it doesn't scroll the page back to the top */
+  position: fixed;
   top: 8px;
   left: 8px;
   z-index: 1000;

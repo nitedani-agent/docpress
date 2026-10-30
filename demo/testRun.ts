@@ -441,6 +441,20 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(await isMenuToggleShown('/tiny', 1366)).toBe(true)
   })
 
+  test(`${featuresURL} - "Skip to content" focused on a scrolled page`, async () => {
+    await page.goto(getServerUrl() + featuresURL)
+    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    await page.evaluate(() => window.scrollTo(0, 800))
+    await page.keyboard.press('Tab')
+    // The page isn't scrolled back to the top to show it
+    const focus = await page.evaluate(() => ({
+      isSkipLink: document.activeElement!.matches('.skip-link'),
+      scrollY: window.scrollY,
+    }))
+    expect(focus.isSkipLink).toBe(true)
+    expect(focus.scrollY).toBe(800)
+  })
+
   test(`${featuresURL} - the first category tab's icon under the logo`, async () => {
     // Desktop, too narrow for the left navigation
     await withViewport({ width: 1040, height: 720 }, async () => {
