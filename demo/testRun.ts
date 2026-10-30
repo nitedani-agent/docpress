@@ -378,27 +378,35 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - menu opened with the keyboard`, async () => {
+    const closeButton = '#menu-modal-wrapper .menu-modal-close'
     // The "Docs" menu: on desktop, beside the left navigation, the category tabs replace it
+    // Desktop too narrow for the left navigation: the dropdown's first link gets the focus
+    await withViewport({ width: 1040, height: 720 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+      await openWithKeyboard('#menu-navigation-0 a[href]')
+    })
     await withViewport({ width: 800, height: 720 }, async () => {
       await page.goto(getServerUrl() + featuresURL)
       await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
       // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
-      await openWithKeyboard()
-      await openWithKeyboard()
+      await openWithKeyboard(closeButton)
+      await openWithKeyboard(closeButton)
       // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
       await page.evaluate(() => window.scrollTo(0, 400))
       await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-      await openWithKeyboard()
+      await openWithKeyboard(closeButton)
     })
-    async function openWithKeyboard() {
+    async function openWithKeyboard(focused: string) {
       await page.focus('.menu-toggle-0')
       await page.keyboard.press('Enter')
       await autoRetry(
         async () => {
           const isOpen = await page.evaluate(
-            () =>
+            (focused) =>
               document.documentElement.classList.contains('menu-modal-show') &&
-              document.activeElement === document.querySelector('#menu-modal-wrapper .menu-modal-close'),
+              document.activeElement === document.querySelector(focused),
+            focused,
           )
           expect(isOpen).toBe(true)
         },
