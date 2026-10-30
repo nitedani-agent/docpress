@@ -70,13 +70,13 @@ function extractPageSections(code: string) {
 
 function parsePageSection(line: string): PageSection & { headingHtml: string } {
   // A file with Windows line endings (CRLF) has a `\r` at the end of each line
-  const [lineBegin, ...lineWords] = line.replace(/\r$/, '').split(' ')
-  assert(lineBegin!.split('#').join('') === '', { line, lineWords })
-  const pageSectionLevel = lineBegin!.length
+  // Same as Markdown: `##` then spaces or tabs, the title, and an optional closing sequence `##`
+  const match = /^(#+)(?:[ \t]+(.*?))??(?:[ \t]+#+)?[ \t]*$/.exec(line.replace(/\r$/, ''))
+  assert(match, { line })
+  const pageSectionLevel = match[1]!.length
 
-  const titleMdx = lineWords.join(' ')
-  assert(!titleMdx.startsWith(' '), { line, lineWords })
-  assert(titleMdx, { line, lineWords })
+  const titleMdx = match[2]
+  assert(titleMdx, { line })
 
   let pageSectionTitle = titleMdx
   let anchor = titleMdx
@@ -85,7 +85,7 @@ function parsePageSection(line: string): PageSection & { headingHtml: string } {
     const customAnchor = /(?<={#).*(?=})/g.exec(titleMdx)?.[0]
     if (customAnchor) {
       anchor = customAnchor
-      pageSectionTitle = titleMdx.replace(/{#.*}/g, '')
+      pageSectionTitle = titleMdx.replace(/[ \t]*{#.*}/g, '')
     }
   }
   const pageSectionId = determineSectionUrlHash(anchor)
