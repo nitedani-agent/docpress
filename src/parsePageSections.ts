@@ -83,11 +83,7 @@ function extractPageSections(code: string) {
   const headings = lines.filter((line) => typeof line !== 'string')
   makeIdsUnique(headings)
   const codeNew = lines.map((line) => (typeof line === 'string' ? line : getHeadingHtml(line))).join('\n')
-  const pageSections: PageSection[] = headings.map(({ pageSectionId, pageSectionLevel, pageSectionTitle }) => ({
-    pageSectionId,
-    pageSectionLevel,
-    pageSectionTitle,
-  }))
+  const pageSections: PageSection[] = headings.map(({ isCustomAnchor, indent, ...pageSection }) => pageSection)
   return { codeNew, pageSections }
 }
 
@@ -107,7 +103,7 @@ function parsePageSection(indent: string, pageSectionLevel: number, titleMdx: st
   const pageSectionId = determineSectionUrlHash(anchor)
   assert(pageSectionId === null || pageSectionId.length > 0)
 
-  return { pageSectionLevel, pageSectionTitle, pageSectionId, isCustomAnchor: anchor !== titleMdx, indent }
+  return { pageSectionId, pageSectionLevel, pageSectionTitle, isCustomAnchor: anchor !== titleMdx, indent }
 }
 
 // A page may repeat a heading title: `#setup`, `#setup-1`, ... (like GitHub). A heading keeps its own id unless a custom
