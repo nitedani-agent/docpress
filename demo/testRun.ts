@@ -379,18 +379,17 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
 
   test(`${featuresURL} - menu opened with the keyboard`, async () => {
     // The "Docs" menu: on desktop, beside the left navigation, the category tabs replace it
-    const viewportSize = page.viewportSize()
-    await page.setViewportSize({ width: 800, height: 720 })
-    await page.goto(getServerUrl() + featuresURL)
-    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-    // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
-    await openWithKeyboard()
-    await openWithKeyboard()
-    // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
-    await page.evaluate(() => window.scrollTo(0, 400))
-    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    await openWithKeyboard()
-    await page.setViewportSize(viewportSize!)
+    await withViewport({ width: 800, height: 720 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+      // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
+      await openWithKeyboard()
+      await openWithKeyboard()
+      // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
+      await page.evaluate(() => window.scrollTo(0, 400))
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await openWithKeyboard()
+    })
     async function openWithKeyboard() {
       await page.focus('.menu-toggle-0')
       await page.keyboard.press('Enter')
@@ -421,61 +420,57 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - "Docs" menu wherever the left navigation is hidden`, async () => {
-    const viewportSize = page.viewportSize()
-    const isMenuToggleShown = async (url: string, width: number) => {
-      await page.setViewportSize({ width, height: 720 })
-      await page.goto(getServerUrl() + url)
-      return await page.isVisible('.menu-toggle-0')
-    }
+    const isMenuToggleShown = (url: string, width: number) =>
+      withViewport({ width, height: 720 }, async () => {
+        await page.goto(getServerUrl() + url)
+        return await page.isVisible('.menu-toggle-0')
+      })
     // Desktop, too narrow for the left navigation
     expect(await isMenuToggleShown(featuresURL, 1040)).toBe(true)
     // Beside the left navigation, the category tabs replace it
     expect(await isMenuToggleShown(featuresURL, 1366)).toBe(false)
     // `hideMenuLeft`
     expect(await isMenuToggleShown('/tiny', 1366)).toBe(true)
-    await page.setViewportSize(viewportSize!)
   })
 
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
-    const viewportSize = page.viewportSize()
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto(getServerUrl() + featuresURL)
-    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-    // A slide that outlasts the scroll: the rail is measured from where it ends up
-    await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
-    // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
-    await page.evaluate(() =>
-      window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - 63 - 40),
-    )
-    await autoRetry(
-      async () => {
-        const isCodeBlocksInked = await page.evaluate(() =>
-          document.querySelector('.toc-item[href="#code-blocks"]')!.hasAttribute('data-visible'),
-        )
-        expect(isCodeBlocksInked).toBe(true)
-      },
-      { timeout: 5 * 1000 },
-    )
-    await page.setViewportSize(viewportSize!)
+    await withViewport({ width: 1440, height: 900 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+      // A slide that outlasts the scroll: the rail is measured from where it ends up
+      await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
+      // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
+      await page.evaluate(() =>
+        window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - 63 - 40),
+      )
+      await autoRetry(
+        async () => {
+          const isCodeBlocksInked = await page.evaluate(() =>
+            document.querySelector('.toc-item[href="#code-blocks"]')!.hasAttribute('data-visible'),
+          )
+          expect(isCodeBlocksInked).toBe(true)
+        },
+        { timeout: 5 * 1000 },
+      )
+    })
   })
 
   test(`${featuresURL} - "On this page" after a jump down`, async () => {
-    const viewportSize = page.viewportSize()
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto(getServerUrl() + featuresURL)
-    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-    // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
-    await page.click('.toc-item[href="#diff"]')
-    await autoRetry(
-      async () => {
-        const firstInked = await page.evaluate(() =>
-          document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
-        )
-        expect(firstInked).toBe('#diff')
-      },
-      { timeout: 5 * 1000 },
-    )
-    await page.setViewportSize(viewportSize!)
+    await withViewport({ width: 1440, height: 900 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+      // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
+      await page.click('.toc-item[href="#diff"]')
+      await autoRetry(
+        async () => {
+          const firstInked = await page.evaluate(() =>
+            document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
+          )
+          expect(firstInked).toBe('#diff')
+        },
+        { timeout: 5 * 1000 },
+      )
+    })
   })
 
   test('client-side navigation', async () => {
@@ -507,6 +502,13 @@ function expectAlgoliaCategory(html: string, category: string, order: number) {
 }
 
 type Page = typeof page
+async function withViewport<T>(size: { width: number; height: number }, fn: () => Promise<T>): Promise<T> {
+  const sizeBefore = page.viewportSize()!
+  await page.setViewportSize(size)
+  const result = await fn()
+  await page.setViewportSize(sizeBefore)
+  return result
+}
 async function getVisibleText(page: Page, selector: string = 'body'): Promise<string> {
   return await page.evaluate((sel) => {
     function extractVisibleText(element: Element): string {
