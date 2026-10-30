@@ -109,18 +109,15 @@ function useActiveSection(tocItems: { id: string }[], withProgress: boolean) {
       const list = rail?.querySelector<HTMLElement>('.toc-list')
       // Hidden (narrow screens): nothing to show
       if (!rail || !list || rail.getClientRects().length === 0) return
-      const page = measurePage(ids, rail)
+      // Just jumped to a section (e.g. a click on the rail): it's the active one until the reader scrolls away
+      if (jump && Math.abs(window.scrollY - jump.scrollY) >= 8) jump = null
+      const jumpedTo = jump ? ids.indexOf(jump.id) : -1
+      const page = measurePage(ids, rail, jumpedTo)
       let activeIndex = 0
       page.sections.forEach((section, i) => {
         if (section && section.start <= page.line) activeIndex = i
       })
-      // Just jumped to a section (e.g. a click on the rail): it's the active one until the reader scrolls away
-      if (jump && Math.abs(window.scrollY - jump.scrollY) < 8) {
-        const jumpedTo = ids.indexOf(jump.id)
-        if (jumpedTo !== -1) activeIndex = jumpedTo
-      } else {
-        jump = null
-      }
+      if (jumpedTo !== -1) activeIndex = jumpedTo
       setActiveIndex(activeIndex)
       const items = Array.from(list.querySelectorAll<HTMLElement>('.toc-item'))
       const listTop = list.getBoundingClientRect().top
@@ -175,20 +172,25 @@ type Section = { start: number; end: number; onScreen: number }
 type Thumb = { top: number; height: number }
 
 // The sections (null: not rendered, e.g. an unselected choice), the part of the page on screen, and the reading line
-function measurePage(ids: string[], rail: HTMLElement) {
-  // Below where the rail sticks once the category tabs are done sliding (a scroll can end before the slide does) and
-  // the gap a heading jumped to keeps above it (heading.css), plus a px (the jump lands on a whole px, the heading up to
-  // 1px lower): with the tabs shown, the section above a heading jumped to isn't on screen
-  const viewTop = parseFloat(getComputedStyle(rail).getPropertyValue('--nav-head-sticky-top-end')) + 17
-  const viewBottom = window.innerHeight
+function measurePage(ids: string[], rail: HTMLElement, jumpedTo: number) {
   // The n-th element with the n-th occurrence of an id (a page can repeat a heading)
   const occurrences = new Map<string, number>()
-  const tops = ids.map((id) => {
+  const headings = ids.map((id) => {
     const occurrence = (occurrences.get(id) ?? -1) + 1
     occurrences.set(id, occurrence)
     const heading = document.querySelectorAll(`[id="${CSS.escape(id)}"]`)[occurrence]
-    return heading?.getClientRects().length ? heading.getBoundingClientRect().top : null
+    return heading?.getClientRects().length ? heading : null
   })
+  const tops = headings.map((heading) => (heading ? heading.getBoundingClientRect().top : null))
+  // Below where the rail sticks once the category tabs are done sliding (a scroll can end before the slide does) and
+  // the gap a heading jumped to keeps above it (heading.css), plus a px (the jump lands on a whole px, the heading up to
+  // 1px lower). Just jumped to a heading: below where it landed, which is also clear of the tabs a jump down hid: the
+  // section above isn't on screen.
+  const jumpedToHeading = headings[jumpedTo]
+  const viewTop = jumpedToHeading
+    ? parseFloat(getComputedStyle(jumpedToHeading).scrollMarginTop) + 1
+    : parseFloat(getComputedStyle(rail).getPropertyValue('--nav-head-sticky-top-end')) + 17
+  const viewBottom = window.innerHeight
   // A section ends where the next rendered one starts
   const sections: (Section | null)[] = []
   let end = document.querySelector('.page-content')?.getBoundingClientRect().bottom ?? 0

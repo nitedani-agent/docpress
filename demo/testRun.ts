@@ -459,6 +459,25 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await page.setViewportSize(viewportSize!)
   })
 
+  test(`${featuresURL} - "On this page" after a jump down`, async () => {
+    const viewportSize = page.viewportSize()
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(getServerUrl() + featuresURL)
+    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
+    await page.click('.toc-item[href="#diff"]')
+    await autoRetry(
+      async () => {
+        const firstInked = await page.evaluate(() =>
+          document.querySelector('.toc-item[data-visible]')!.getAttribute('href'),
+        )
+        expect(firstInked).toBe('#diff')
+      },
+      { timeout: 5 * 1000 },
+    )
+    await page.setViewportSize(viewportSize!)
+  })
+
   test('client-side navigation', async () => {
     await page.click('.nav-head a[href="/"]')
     await autoRetry(
