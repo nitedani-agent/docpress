@@ -1,5 +1,5 @@
 /* Registered: TocRail.tsx reads it in px (Layout.tsx) */
-@property --nav-head-sticky-top-end {
+@property --nav-head-shown-height {
   syntax: '<length>';
   inherits: true;
   initial-value: 0px;

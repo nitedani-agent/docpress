@@ -105,13 +105,9 @@ function Layout({ children }: { children: React.ReactNode }) {
         ['--nav-head-sticky-offset']: isTopNavSticky
           ? 'calc(var(--nav-head-height) + var(--nav-tabs-height, 0px))'
           : '0px',
-        // Offset for sticky elements below the top nav: it follows the category tabs as they slide (CategoryTabs.css)
-        ['--nav-head-sticky-top']: isTopNavSticky
-          ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height))'
-          : '0px',
-        // Where they stick once the category tabs are done sliding (TocRail.tsx measures from it)
-        ['--nav-head-sticky-top-end']: isTopNavSticky
-          ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height-end, 0px))'
+        // The sticky top nav's shown height, the category tabs included unless hidden (TocRail.tsx measures from it)
+        ['--nav-head-shown-height']: isTopNavSticky
+          ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height, 0px))'
           : '0px',
         ['--main-view-padding']: `${mainViewPadding}px`,
         // We don't add `container` to `body` nor `html` beacuse in Firefox it breaks the `position: fixed` of <MenuModal>
@@ -285,7 +281,9 @@ function PageContent({ children }: { children: React.ReactNode }) {
 
 function NavLeft() {
   const pageContext = usePageContext()
-  const { navItemsAll, navItemsDetached } = pageContext.resolved
+  const { navItemsAll, navItemsDetached, categories } = pageContext.resolved
+  // With the category tabs (Layout()): under them, and shown when they hide (NavItemComponent.css)
+  const categoryCurrent = categories.length > 1 && categories.find((category) => category.isCurrent)
   return (
     <>
       <Style>{getStyleNavLeft()}</Style>
@@ -303,16 +301,23 @@ function NavLeft() {
         <div
           style={{
             position: 'sticky',
-            // Sit below the sticky top nav (or at the very top when the top nav isn't sticky)
-            top: 'var(--nav-head-sticky-top)',
+            // Sit below the sticky top nav and its category tabs, also while they're hidden (or at the very top when
+            // the top nav isn't sticky)
+            top: 'var(--nav-head-sticky-offset)',
           }}
         >
+          {categoryCurrent && (
+            <span className="nav-item-level-1 nav-left-category" style={{ '--color-category': categoryCurrent.color }}>
+              {categoryCurrent.titleIcon && <img src={categoryCurrent.titleIcon} alt="" />}
+              {parseMarkdownMini(categoryCurrent.title)}
+            </span>
+          )}
           <div
             id="navigation-container"
             className="scroll-fade"
             style={{
               top: 0,
-              height: `calc(100vh - var(--nav-head-sticky-top) - var(--block-margin))`,
+              height: `calc(100vh - var(--nav-head-sticky-offset) - var(--block-margin))`,
               overflowY: 'auto',
               overscrollBehavior: 'contain',
               paddingBottom: 40,

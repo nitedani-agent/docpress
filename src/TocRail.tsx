@@ -182,11 +182,11 @@ function measurePage(ids: string[], rail: HTMLElement, jumpedTo: number) {
     return heading?.getClientRects().length ? heading : null
   })
   const tops = headings.map((heading) => (heading ? heading.getBoundingClientRect().top : null))
-  // Below where the rail sticks once the tabs stop sliding (+17: a jumped-to heading's 16px gap and a px); after a jump, below where the heading landed
+  // Below the top nav as shown (+17: a jumped-to heading's 16px gap and a px); after a jump, below where the heading landed
   const jumpedToHeading = headings[jumpedTo]
   const viewTop = jumpedToHeading
     ? parseFloat(getComputedStyle(jumpedToHeading).scrollMarginTop) + 1
-    : parseFloat(getComputedStyle(rail).getPropertyValue('--nav-head-sticky-top-end')) + 17
+    : parseFloat(getComputedStyle(rail).getPropertyValue('--nav-head-shown-height')) + 17
   const viewBottom = window.innerHeight
   // A section ends where the next rendered one starts
   const sections: (Section | null)[] = []

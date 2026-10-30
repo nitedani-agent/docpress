@@ -45,8 +45,15 @@
   }
   /* The current category tab already names it: the first page or group label takes the breadcrumb's line */
   .has-category-tabs & {
-    .nav-item-level-1 {
+    .navigation-content .nav-item-level-1 {
       display: none;
+    }
+    /* Above the list, under the tabs: shown when they slide away (Layout.tsx) */
+    .nav-left-category {
+      position: absolute;
+      bottom: 100%;
+      height: var(--nav-tabs-height);
+      margin: 0 0 0 var(--nav-indent);
     }
     .nav-item-level-1 + .nav-item-level-2 {
       margin-top: 16px;

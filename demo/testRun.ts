@@ -451,7 +451,51 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await open(featuresURL, 'desktop')
     expect(await page.textContent('.category-tab.is-current')).toBe('Overview')
     expect(await page.isVisible('#nav-left .nav-item-level-2')).toBe(true)
-    expect(await getVisibleText(page, '#nav-left')).not.toContain('Overview')
+    expect(await getVisibleText(page, '#navigation-container')).not.toContain('Overview')
+  })
+
+  test(`${featuresURL} - the sides stay put when the category tabs hide, which reveals the category's title`, async () => {
+    await open(featuresURL, 'desktop')
+    const getSides = () =>
+      page.evaluate(() =>
+        ['#navigation-container', '.toc-rail-sticky']
+          .map((selector) => {
+            const { top, height } = document.querySelector(selector)!.getBoundingClientRect()
+            return `${selector}: ${top}px, ${height}px high`
+          })
+          .join('; '),
+      )
+    // Under the tabs: the left's top shows it only once they're hidden
+    const isTitleOnTop = () =>
+      page.evaluate(() => {
+        const { left, top, height } = document.querySelector('.nav-left-category')!.getBoundingClientRect()
+        return !!document.elementFromPoint(left + 1, top + height / 2)!.closest('.nav-left-category')
+      })
+    await scrollTo(1200)
+    await scrollTo(1199)
+    await autoRetry(
+      async () => {
+        expect(await isCategoryTabsHidden()).toBe(false)
+        expect(await page.evaluate(() => getComputedStyle(document.querySelector('.category-tabs')!).transform)).toBe(
+          'none',
+        )
+      },
+      { timeout: 5 * 1000 },
+    )
+    const sides = await getSides()
+    await scrollTo(1200)
+    expect(await getSides()).toBe(sides)
+    await autoRetry(
+      async () => {
+        expect(await getSides()).toBe(sides)
+        expect(await isTitleOnTop()).toBe(true)
+      },
+      { timeout: 5 * 1000 },
+    )
+    // Shown again: they cover it
+    await scrollTo(1199)
+    await autoRetry(async () => expect(await isTitleOnTop()).toBe(false), { timeout: 5 * 1000 })
+    expect(await getSides()).toBe(sides)
   })
 
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
