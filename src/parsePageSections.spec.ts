@@ -38,6 +38,10 @@ describe('extractPageSections()', () => {
       ['<A title="{/*" />'],
       ["export const c = '{/*'", ''],
       ['Use `{/*', 'to start a comment.`'],
+      ["Write <code>{'Type {/* here'}</code> to start a comment."],
+      ['<A title="Type {/* here" />'],
+      ["export const c = 'Type {/*'", ''],
+      ['export const c = `', '{/*', '`', ''],
     ]
     examples.forEach((lines) => {
       const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))

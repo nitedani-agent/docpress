@@ -1,5 +1,6 @@
 export { parsePageSections }
 export { extractPageSections }
+export { remarkPluginsSyntax }
 export type { PageSection }
 
 import type { PluginOption } from 'vite'
@@ -7,6 +8,14 @@ import { assert, assertUsage } from './utils/assert.js'
 import { determineSectionUrlHash } from './utils/determineSectionUrlHash.js'
 import os from 'os'
 import pc from '@brillout/picocolors'
+import { createProcessor } from '@mdx-js/mdx'
+import remarkGfm from 'remark-gfm'
+import remarkDirective from 'remark-directive'
+import { visit } from 'unist-util-visit'
+
+// The remark plugins that extend MDX's syntax, so that a page is parsed here as MDX parses it
+const remarkPluginsSyntax = [remarkGfm, remarkDirective]
+const mdxProcessor = createProcessor({ remarkPlugins: remarkPluginsSyntax })
 
 type PageSection = {
   pageSectionTitle: string
@@ -35,47 +44,21 @@ function transform(code: string) {
 
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
-  let codeBlockFence: string | null = null
-  let isComment = false
-  const lines = code.split('\n').map((line) => {
-    // Skip MDX comments, e.g.
-    // {/*
-    // ## Draft
-    // */}
-    if (isComment) {
-      if (/\*\//.test(line)) isComment = false
-      return line
-    }
-
-    // Skip code blocks, e.g.
-    // ~~~md
-    // # Markdown Example
-    // Bla
-    // ~~~
-    if (codeBlockFence) {
-      // Closed by the same character, at least as many times (CommonMark)
-      const fence = /^ {0,3}(`{3,}|~{3,})[ \t]*\r?$/.exec(line)?.[1]
-      if (fence?.startsWith(codeBlockFence)) codeBlockFence = null
-      return line
-    }
-    // The info string of a backtick fence can't contain backticks (CommonMark)
-    const fence = /^ {0,3}(`{3,}(?!.*`)|~{3,})/.exec(line)?.[1]
-    if (fence) {
-      codeBlockFence = fence
-      return line
-    }
-
-    // A `{/*` outside code spans and strings, without `*/` after it, opens a multi-line MDX comment
-    if (/(?<!['"`])\{\s*\/\*(?!.*\*\/)/.test(line.replace(/(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)/g, ''))) {
-      isComment = true
-      return line
-    }
-
+  // A custom anchor `## Some Title{#some-hash}` isn't MDX: it's removed before MDX compiles the page
+  const codeMdx = code.replace(
+    /^( {0,3}#{1,6}[ \t].*?)({#.*})/gm,
+    (_, title, anchor) => title + ' '.repeat(anchor.length),
+  )
+  const headingLines = new Set<number>()
+  visit(mdxProcessor.parse(codeMdx), 'heading', (node) => {
+    headingLines.add(node.position!.start.line - 1)
+  })
+  const lines = code.split('\n').map((line, i) => {
     /* TO-DO/eventually: implement.
     || line.startsWith('<h2')
     */
     // E.g. `## Some Title`, also with tabs or more spaces after `##`, and indented by up to 3 spaces (CommonMark)
-    const heading = /^( {0,3})(#{1,6})[ \t]+(?=\S)/.exec(line)
+    const heading = headingLines.has(i) && /^( {0,3})(#{1,6})[ \t]+(?=\S)/.exec(line)
     if (heading) {
       const [match, indent, hashes] = heading
       return parsePageSection(indent!, hashes!.length, line.slice(match.length))
