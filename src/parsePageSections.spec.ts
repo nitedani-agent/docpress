@@ -21,4 +21,23 @@ describe('extractPageSections()', () => {
     expect(getIds(['### Setup', '### Setup', '### Setup 1'])).toEqual(['setup', 'setup-2', 'setup-1'])
     expect(getIds(['## Setup', '## Install{#setup}'])).toEqual(['setup-1', 'setup'])
   })
+
+  it('skips code blocks and MDX comments', () => {
+    const lines = [
+      '````md',
+      '```js',
+      '```',
+      '### Setup',
+      '````',
+      '  ~~~md',
+      '  ## Setup',
+      '  ~~~',
+      '{/*',
+      '### Setup',
+      '*/}',
+    ]
+    const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))
+    expect(codeNew).toBe([...lines, `<h2 id="setup">{'Setup'}</h2>`].join('\n'))
+    expect(pageSections).toEqual([{ pageSectionId: 'setup', pageSectionLevel: 2, pageSectionTitle: 'Setup' }])
+  })
 })

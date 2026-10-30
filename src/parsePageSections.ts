@@ -34,18 +34,36 @@ function transform(code: string) {
 
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
-  let isCodeBlock = false
+  let codeBlockFence: string | null = null
+  let isComment = false
   const lines = code.split('\n').map((line) => {
     // Skip code blocks, e.g.
     // ~~~md
     // # Markdown Example
     // Bla
     // ~~~
-    if (line.startsWith('~~~') || line.startsWith('```')) {
-      isCodeBlock = !isCodeBlock
+    if (codeBlockFence) {
+      // Closed by the same character, at least as many times (CommonMark)
+      const fence = /^ {0,3}(`{3,}|~{3,})[ \t]*\r?$/.exec(line)?.[1]
+      if (fence?.startsWith(codeBlockFence)) codeBlockFence = null
       return line
     }
-    if (isCodeBlock) {
+    const fence = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1]
+    if (fence) {
+      codeBlockFence = fence
+      return line
+    }
+
+    // Skip MDX comments, e.g.
+    // {/*
+    // ## Draft
+    // */}
+    if (isComment) {
+      if (/\*\/\s*\}/.test(line)) isComment = false
+      return line
+    }
+    if (/\{\s*\/\*(?![^]*\*\/\s*\})/.test(line)) {
+      isComment = true
       return line
     }
 
