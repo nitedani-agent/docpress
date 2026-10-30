@@ -97,7 +97,7 @@ function getSelfOriginRegExp(docsUrl: string): RegExp {
   return new RegExp(`^https?://(www\\.)?${hostnameEscaped}(?=[/?#]|$)`, 'i')
 }
 
-/** All pages, by URL, and their errors: invalid MDX, or a usage error of their headings (e.g. two headings with the same custom anchor) */
+/** All pages, by URL, and their errors: MDX whose blocks don't parse (e.g. an unclosed `{/*` at a line start), or a usage error of their headings (e.g. two headings with the same custom anchor) */
 function getPages(files: string[], root: string): { pages: Docs['pages']; pageErrors: string[] } {
   const pages: Docs['pages'] = new Map()
   const pageErrors: string[] = []
