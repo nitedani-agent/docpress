@@ -34,6 +34,10 @@ describe('extractPageSections()', () => {
       ['Use `{/*` to start an MDX comment.'],
       ['<div>{/*', '## Setup', '*/}</div>'],
       ['    {/*', '## Setup', '*/}'],
+      ["Write <code>{'{/*'}</code> here."],
+      ['<A title="{/*" />'],
+      ["export const c = '{/*'", ''],
+      ['Use `{/*', 'to start a comment.`'],
     ]
     examples.forEach((lines) => {
       const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))

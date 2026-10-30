@@ -65,8 +65,8 @@ function extractPageSections(code: string) {
       return line
     }
 
-    // A `{/*` outside code spans, without `*/` after it, opens a multi-line MDX comment
-    if (/\{\s*\/\*(?!.*\*\/)/.test(line.replace(/(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)/g, ''))) {
+    // A `{/*` outside code spans and strings, without `*/` after it, opens a multi-line MDX comment
+    if (/(?<!['"`])\{\s*\/\*(?!.*\*\/)/.test(line.replace(/(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)/g, ''))) {
       isComment = true
       return line
     }
