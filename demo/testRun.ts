@@ -441,6 +441,8 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto(getServerUrl() + featuresURL)
     await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+    // A slide that outlasts the scroll: the rail is measured from where it ends up
+    await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
     // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
     await page.evaluate(() =>
       window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - 63 - 40),

@@ -110,6 +110,10 @@ function Layout({ children }: { children: React.ReactNode }) {
         ['--nav-head-sticky-top']: isTopNavSticky
           ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height))'
           : '0px',
+        // Where they stick once the category tabs are done sliding (TocRail.tsx measures from it)
+        ['--nav-head-sticky-top-end']: isTopNavSticky
+          ? 'calc(var(--nav-head-height) + var(--nav-tabs-shown-height-end, 0px))'
+          : '0px',
         ['--main-view-padding']: `${mainViewPadding}px`,
         // We don't add `container` to `body` nor `html` beacuse in Firefox it breaks the `position: fixed` of <MenuModal>
         // https://stackoverflow.com/questions/74601420/css-container-inline-size-and-fixed-child
@@ -441,7 +445,7 @@ function getStyleTopNavSticky() {
 /* Scrolling down slides the category tabs under the top bar (CategoryTabs.tsx), unless they have the keyboard focus */
 html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
   .has-category-tabs {
-    --nav-tabs-shown-height: 0px;
+    --nav-tabs-shown-height-end: 0px;
   }
   .category-tabs {
     transform: translateY(-100%);

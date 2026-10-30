@@ -1,12 +1,14 @@
 /* CategoryTabs.tsx: shown on desktop, see Layout.tsx */
-/* The tabs' height below the top bar, followed by the sticky left navigation and "On this page" (Layout.tsx) */
+/* The tabs' height below the top bar, followed by the sticky left navigation and "On this page" (Layout.tsx): animated
+   as they slide, and where they end up (0 once scrolling down hid them, Layout.tsx) */
 @property --nav-tabs-shown-height {
   syntax: '<length>';
   inherits: true;
   initial-value: 0px;
 }
 .has-category-tabs {
-  --nav-tabs-shown-height: var(--nav-tabs-height, 0px);
+  --nav-tabs-shown-height-end: var(--nav-tabs-height, 0px);
+  --nav-tabs-shown-height: var(--nav-tabs-shown-height-end);
   transition: --nav-tabs-shown-height var(--dp-duration-reveal) var(--dp-ease-out);
 }
 .category-tabs {
