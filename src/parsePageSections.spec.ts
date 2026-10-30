@@ -23,32 +23,21 @@ describe('extractPageSections()', () => {
   })
 
   it('skips code blocks and MDX comments', () => {
-    const lines = [
-      '````md',
-      '```js',
-      '```',
-      '### Setup',
-      '````',
-      '  ~~~md',
-      '  ## Setup',
-      '  ~~~',
-      '  ```npm install```',
-      '{/*',
-      '### Setup',
-      '*/}',
-      '{/*',
-      '### Setup',
-      '*/',
-      '}',
-      '{/*',
-      '  ```md',
-      '*/}',
-      '{/* note */ <span>x</span>}',
-      'Use `{/*` to start an MDX comment.',
+    const examples = [
+      ['````md', '```js', '```', '### Setup', '````'],
+      ['  ~~~md', '  ## Setup', '  ~~~'],
+      ['  ```npm install```'],
+      ['{/*', '### Setup', '*/}'],
+      ['{/*', '### Setup', '*/', '}'],
+      ['{/*', '  ```md', '*/}'],
+      ['{/* note */ <span>x</span>}'],
+      ['Use `{/*` to start an MDX comment.'],
     ]
-    const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))
-    expect(codeNew).toBe([...lines, `<h2 id="setup">{'Setup'}</h2>`].join('\n'))
-    expect(pageSections).toEqual([{ pageSectionId: 'setup', pageSectionLevel: 2, pageSectionTitle: 'Setup' }])
+    examples.forEach((lines) => {
+      const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))
+      expect(codeNew).toBe([...lines, `<h2 id="setup">{'Setup'}</h2>`].join('\n'))
+      expect(pageSections).toEqual([{ pageSectionId: 'setup', pageSectionLevel: 2, pageSectionTitle: 'Setup' }])
+    })
   })
 
   it('throws a usage error upon two headings with the same custom anchor', () => {
