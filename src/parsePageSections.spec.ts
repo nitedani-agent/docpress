@@ -36,6 +36,11 @@ describe('extractPageSections()', () => {
       '### Setup',
       '*/}',
       'Use `{/*` to start an MDX comment.',
+      '{/*',
+      '### Setup',
+      '*/',
+      '}',
+      '{/* note */ <span>x</span>}',
     ]
     const { codeNew, pageSections } = extractPageSections([...lines, '## Setup'].join('\n'))
     expect(codeNew).toBe([...lines, `<h2 id="setup">{'Setup'}</h2>`].join('\n'))
