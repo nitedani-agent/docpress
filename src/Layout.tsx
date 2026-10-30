@@ -28,7 +28,6 @@ import { MenuModal } from './MenuModal.js'
 import { autoScrollNav_SSR } from './autoScrollNav.js'
 import { initializeChoiceGroup_SSR } from './code-blocks/hooks/useCurrentSelection.js'
 import { SearchLink } from './docsearch/SearchLink.js'
-import { navigate } from 'vike/client/router'
 import { css } from './utils/css.js'
 import { Style } from './utils/Style.js'
 import { cls } from './utils/cls.js'
@@ -779,8 +778,11 @@ function NavHeadLogo() {
     if (!pageContext.globalContext.config.docpress.pressKit) return // no /press page
     if (window.location.pathname === '/press') return
     ev.preventDefault()
-    // @ts-ignore TODO/now Will be fixed in the next Vike version — remove this @ts-expect-error then.
-    navigate('/press#logo')
+    // Imported lazily: a static import closes a chunk cycle through vike's navigate.ts -> initClientRouter import
+    import('vike/client/router').then(({ navigate }) => {
+      // @ts-ignore TODO/now Will be fixed in the next Vike version — remove this @ts-expect-error then.
+      navigate('/press#logo')
+    })
   }
 }
 function isProjectNameShort(name: string) {
