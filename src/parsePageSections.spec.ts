@@ -1,22 +1,24 @@
 import { describe, it, expect } from 'vitest'
 import { extractPageSections } from './parsePageSections.js'
 
+const getIds = (headings: string[]) =>
+  extractPageSections(headings.join('\n')).pageSections.map(({ pageSectionId }) => pageSectionId)
+
 describe('extractPageSections()', () => {
   it('gives repeated headings unique ids', () => {
-    const { codeNew, pageSections } = extractPageSections(
-      ['## Repeated', '### Repeated', '## Repeated 1', '## Repeated', '## Other{#repeated}', '## Тест', '## Тест'].join(
-        '\n',
-      ),
+    const { codeNew } = extractPageSections(['## Repeated', '### Repeated', '## Repeated'].join('\n'))
+    expect(codeNew).toBe(
+      [
+        `<h2 id="repeated">{'Repeated'}</h2>`,
+        `<h3 id="repeated-1">{'Repeated'}</h3>`,
+        `<h2 id="repeated-2">{'Repeated'}</h2>`,
+      ].join('\n'),
     )
-    expect(pageSections.map(({ pageSectionId }) => pageSectionId)).toEqual([
-      'repeated',
-      'repeated-1',
-      'repeated-1-1',
-      'repeated-2',
-      'repeated',
-      null,
-      null,
-    ])
-    expect(codeNew).toContain(`<h3 id="repeated-1">{'Repeated'}</h3>`)
+    expect(getIds(['## Тест', '## Тест'])).toEqual([null, null])
+  })
+
+  it("doesn't take another heading's id", () => {
+    expect(getIds(['### Setup', '### Setup', '### Setup 1'])).toEqual(['setup', 'setup-2', 'setup-1'])
+    expect(getIds(['## Setup', '## Install{#setup}'])).toEqual(['setup-1', 'setup'])
   })
 })

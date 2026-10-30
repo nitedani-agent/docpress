@@ -34,47 +34,46 @@ function transform(code: string) {
 
 /** Replaces the Markdown headings with HTML headings (with their `id`) and returns them as page sections — also used by `$ docpress lint` */
 function extractPageSections(code: string) {
-  const pageSections: PageSection[] = []
-  const pageSectionIds = new Set<string>()
   let isCodeBlock = false
-  const codeNew = code
-    .split('\n')
-    .map((line) => {
-      // Skip code blocks, e.g.
-      // ~~~md
-      // # Markdown Example
-      // Bla
-      // ~~~
-      if (line.startsWith('~~~') || line.startsWith('```')) {
-        isCodeBlock = !isCodeBlock
-        return line
-      }
-      if (isCodeBlock) {
-        return line
-      }
-
-      if (
-        line.startsWith('#')
-        /* TO-DO/eventually: implement.
-        || line.startsWith('<h2')
-        */
-      ) {
-        const { pageSectionId, pageSectionLevel, pageSectionTitle, headingHtml } = parsePageSection(
-          line,
-          pageSectionIds,
-        )
-        if (pageSectionId) pageSectionIds.add(pageSectionId)
-        pageSections.push({ pageSectionId, pageSectionLevel, pageSectionTitle })
-        return headingHtml
-      }
-
+  const lines = code.split('\n').map((line) => {
+    // Skip code blocks, e.g.
+    // ~~~md
+    // # Markdown Example
+    // Bla
+    // ~~~
+    if (line.startsWith('~~~') || line.startsWith('```')) {
+      isCodeBlock = !isCodeBlock
       return line
-    })
-    .join('\n')
+    }
+    if (isCodeBlock) {
+      return line
+    }
+
+    if (
+      line.startsWith('#')
+      /* TO-DO/eventually: implement.
+      || line.startsWith('<h2')
+      */
+    ) {
+      return parsePageSection(line)
+    }
+
+    return line
+  })
+  const headings = lines.filter((line) => typeof line !== 'string')
+  makeIdsUnique(headings)
+  const codeNew = lines.map((line) => (typeof line === 'string' ? line : getHeadingHtml(line))).join('\n')
+  const pageSections: PageSection[] = headings.map(({ pageSectionId, pageSectionLevel, pageSectionTitle }) => ({
+    pageSectionId,
+    pageSectionLevel,
+    pageSectionTitle,
+  }))
   return { codeNew, pageSections }
 }
 
-function parsePageSection(line: string, pageSectionIds: Set<string>): PageSection & { headingHtml: string } {
+type Heading = PageSection & { isCustomAnchor: boolean }
+
+function parsePageSection(line: string): Heading {
   const [lineBegin, ...lineWords] = line.split(' ')
   assert(lineBegin!.split('#').join('') === '', { line, lineWords })
   const pageSectionLevel = lineBegin!.length
@@ -84,27 +83,44 @@ function parsePageSection(line: string, pageSectionIds: Set<string>): PageSectio
   assert(titleMdx, { line, lineWords })
 
   let pageSectionTitle = titleMdx
-  let pageSectionId = determineSectionUrlHash(titleMdx)
+  let anchor = titleMdx
   {
     // Support custom anchor: `## Some Title{#custom-anchor}`
     const customAnchor = /(?<={#).*(?=})/g.exec(titleMdx)?.[0]
     if (customAnchor) {
-      pageSectionId = determineSectionUrlHash(customAnchor)
+      anchor = customAnchor
       pageSectionTitle = titleMdx.replace(/{#.*}/g, '')
-    } else if (pageSectionId) {
-      // A page may repeat a title: `#some-title`, `#some-title-1`, `#some-title-2`, ... (like GitHub)
-      const idBase = pageSectionId
-      for (let i = 1; pageSectionIds.has(pageSectionId); i++) pageSectionId = `${idBase}-${i}`
     }
   }
-
-  const titleParsed = parseMarkdownMini(pageSectionTitle)
+  const pageSectionId = determineSectionUrlHash(anchor)
   assert(pageSectionId === null || pageSectionId.length > 0)
-  const headingId = pageSectionId === null ? '' : ` id="${pageSectionId}"`
-  const headingHtml = `<h${pageSectionLevel}${headingId}>${titleParsed}</h${pageSectionLevel}>`
 
-  const pageSection = { pageSectionLevel, pageSectionTitle, pageSectionId, headingHtml }
-  return pageSection
+  return { pageSectionLevel, pageSectionTitle, pageSectionId, isCustomAnchor: anchor !== titleMdx }
+}
+
+// A page may repeat a heading title: `#setup`, `#setup-1`, ... (like GitHub). A heading keeps its own id unless a custom
+// anchor or an earlier heading has it, and a suffix never takes another heading's own id.
+function makeIdsUnique(headings: Heading[]) {
+  const idsOwn = new Set(headings.map((heading) => heading.pageSectionId))
+  const idsTaken = new Set(headings.filter((heading) => heading.isCustomAnchor).map((heading) => heading.pageSectionId))
+  headings.forEach((heading) => {
+    const idBase = heading.pageSectionId
+    if (idBase === null || heading.isCustomAnchor) return
+    let id = idBase
+    let i = 0
+    while (idsTaken.has(id)) {
+      do id = `${idBase}-${++i}`
+      while (idsOwn.has(id))
+    }
+    heading.pageSectionId = id
+    idsTaken.add(id)
+  })
+}
+
+function getHeadingHtml({ pageSectionLevel, pageSectionTitle, pageSectionId }: Heading): string {
+  const titleParsed = parseMarkdownMini(pageSectionTitle)
+  const headingId = pageSectionId === null ? '' : ` id="${pageSectionId}"`
+  return `<h${pageSectionLevel}${headingId}>${titleParsed}</h${pageSectionLevel}>`
 }
 
 function parseMarkdownMini(titleMarkdown: string): string {
