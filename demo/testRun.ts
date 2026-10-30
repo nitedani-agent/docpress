@@ -377,48 +377,20 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(html).toContain('<meta name="algolia:category" content="Guides 2"><meta name="algolia:category:hide">')
   })
 
-  test(`${featuresURL} - menu opened with the keyboard`, async () => {
-    const closeButton = '#menu-modal-wrapper .menu-modal-close'
-    // The "Docs" menu: on desktop, beside the left navigation, the category tabs replace it
-    // Desktop too narrow for the left navigation: the dropdown's first link gets the focus
+  test(`${featuresURL} - "Docs" dropdown opened with the keyboard focuses its first link (narrow desktop)`, async () => {
     await open(featuresURL, 'desktopNarrow')
     await openWithKeyboard('#menu-navigation-0 a[href]')
+  })
+
+  test(`${featuresURL} - menu dialog opened with the keyboard: focus on the close button and back on the toggle, also opened again and scrolled down (tablet)`, async () => {
+    const closeButton = '#menu-modal-wrapper .menu-modal-close'
     await open(featuresURL, 'tablet')
-    // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
     await openWithKeyboard(closeButton)
     await openWithKeyboard(closeButton)
-    // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
+    // Once the scroll event is past (a scroll of the page closes the menu)
     await page.evaluate(() => window.scrollTo(0, 400))
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await openWithKeyboard(closeButton)
-    async function openWithKeyboard(focused: string) {
-      await page.focus('.menu-toggle-0')
-      await page.keyboard.press('Enter')
-      await autoRetry(
-        async () => {
-          const isOpen = await page.evaluate(
-            (focused) =>
-              document.documentElement.classList.contains('menu-modal-show') &&
-              document.activeElement === document.querySelector(focused),
-            focused,
-          )
-          expect(isOpen).toBe(true)
-        },
-        { timeout: 5 * 1000 },
-      )
-      await page.keyboard.press('Escape')
-      await autoRetry(
-        async () => {
-          const isClosed = await page.evaluate(
-            () =>
-              !document.documentElement.classList.contains('menu-modal-show') &&
-              document.activeElement === document.querySelector('.menu-toggle-0'),
-          )
-          expect(isClosed).toBe(true)
-        },
-        { timeout: 5 * 1000 },
-      )
-    }
   })
 
   test(`${featuresURL} - "Docs" menu wherever the left navigation is hidden`, async () => {
@@ -431,6 +403,8 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(await isMenuToggleShown(featuresURL, 'desktop')).toBe(false)
     // `hideMenuLeft`
     expect(await isMenuToggleShown('/tiny', 'desktop')).toBe(true)
+    // Detached pages
+    expect(await isMenuToggleShown(orphanURL, 'desktop')).toBe(true)
   })
 
   test(`${featuresURL} - "Skip to content" focused on a scrolled page`, async () => {
@@ -452,7 +426,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await expectWholeFocusRing('.nav-head-menu-toggle .text-menu')
   })
 
-  test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon`, async () => {
+  test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon, and doesn't move between pages`, async () => {
     const getLogoLeft = () =>
       page.evaluate(() => document.querySelector('.nav-head-logo img')!.getBoundingClientRect().left)
     await open(featuresURL, 'desktop')
@@ -499,7 +473,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     )
   })
 
-  test(`${featuresURL} - "On this page" after a jump down`, async () => {
+  test(`${featuresURL} - "On this page" after a jump down: the clicked section is the first marked`, async () => {
     await open(featuresURL, 'desktop')
     // The jump hides the category tabs: above the "Diff" heading, only its top margin is on screen
     await page.click('.toc-item[href="#diff"]')
@@ -514,16 +488,24 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     )
   })
 
-  test(`${featuresURL} - category tabs hidden on scroll down, shown on scroll up and on keyboard focus`, async () => {
+  test(`${featuresURL} - category tabs hide on scroll down and come back on scroll up`, async () => {
     await open(featuresURL, 'desktop')
-    const isHidden = () => page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
-    const scrollTo = (y: number) => page.evaluate((y) => window.scrollTo(0, y), y)
+    await scrollTo(1200)
+    await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(true), { timeout: 5 * 1000 })
+    await scrollTo(1199)
+    await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(false), { timeout: 5 * 1000 })
+    await scrollTo(1500)
+    await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(true), { timeout: 5 * 1000 })
+  })
+
+  test(`${featuresURL} - the strip the hidden category tabs leave takes clicks`, async () => {
+    await open(featuresURL, 'desktop')
     const navHeadHeight = await getNavHeadHeight()
     await scrollTo(1200)
     await autoRetry(
       async () => {
-        expect(await isHidden()).toBe(true)
-        // The strip the tabs leave, 20px below the top bar, is the page's
+        expect(await isCategoryTabsHidden()).toBe(true)
+        // 20px below the top bar: the page, not the header
         const isStripClickable = await page.evaluate(
           (y) => !document.elementFromPoint(700, y)!.closest('header'),
           navHeadHeight + 20,
@@ -532,11 +514,13 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       },
       { timeout: 5 * 1000 },
     )
-    await scrollTo(1199)
-    await autoRetry(async () => expect(await isHidden()).toBe(false), { timeout: 5 * 1000 })
+  })
+
+  test(`${featuresURL} - Tab into the hidden category tabs shows them, with a whole focus ring`, async () => {
+    await open(featuresURL, 'desktop')
     await scrollTo(1500)
-    await autoRetry(async () => expect(await isHidden()).toBe(true), { timeout: 5 * 1000 })
-    // Tabbing from the top bar's last control into the hidden tabs shows them
+    await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(true), { timeout: 5 * 1000 })
+    // From the top bar's last control
     await page.evaluate(() => {
       const controls = document.querySelectorAll<HTMLElement>('.nav-head :is(a[href], button)')
       controls[controls.length - 1]!.focus({ preventScroll: true })
@@ -553,7 +537,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       },
       { timeout: 5 * 1000 },
     )
-    // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
+    // The tabs' row scrolls sideways: it clips
     await expectWholeFocusRing('.category-tab:focus')
   })
 
@@ -599,6 +583,40 @@ async function open(url: string, viewport: Viewport) {
   await page.setViewportSize(viewports[viewport])
   await page.goto(getServerUrl() + url)
   await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
+}
+async function openWithKeyboard(focused: string) {
+  await page.focus('.menu-toggle-0')
+  await page.keyboard.press('Enter')
+  await autoRetry(
+    async () => {
+      const isOpen = await page.evaluate(
+        (focused) =>
+          document.documentElement.classList.contains('menu-modal-show') &&
+          document.activeElement === document.querySelector(focused),
+        focused,
+      )
+      expect(isOpen).toBe(true)
+    },
+    { timeout: 5 * 1000 },
+  )
+  await page.keyboard.press('Escape')
+  await autoRetry(
+    async () => {
+      const isClosed = await page.evaluate(
+        () =>
+          !document.documentElement.classList.contains('menu-modal-show') &&
+          document.activeElement === document.querySelector('.menu-toggle-0'),
+      )
+      expect(isClosed).toBe(true)
+    },
+    { timeout: 5 * 1000 },
+  )
+}
+async function scrollTo(y: number) {
+  await page.evaluate((y) => window.scrollTo(0, y), y)
+}
+async function isCategoryTabsHidden() {
+  return await page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
 }
 async function getNavHeadHeight(): Promise<number> {
   const navHeadHeight = await page.evaluate(() =>
