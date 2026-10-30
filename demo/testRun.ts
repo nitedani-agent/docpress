@@ -386,16 +386,22 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
     await openWithKeyboard()
     await openWithKeyboard()
+    // Also scrolled down, once the scroll event is past (a scroll of the page closes the menu)
+    await page.evaluate(() => window.scrollTo(0, 400))
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await openWithKeyboard()
     await page.setViewportSize(viewportSize!)
     async function openWithKeyboard() {
       await page.focus('.menu-toggle-0')
       await page.keyboard.press('Enter')
       await autoRetry(
         async () => {
-          const isFocused = await page.evaluate(
-            () => document.activeElement === document.querySelector('#menu-modal-wrapper .menu-modal-close'),
+          const isOpen = await page.evaluate(
+            () =>
+              document.documentElement.classList.contains('menu-modal-show') &&
+              document.activeElement === document.querySelector('#menu-modal-wrapper .menu-modal-close'),
           )
-          expect(isFocused).toBe(true)
+          expect(isOpen).toBe(true)
         },
         { timeout: 5 * 1000 },
       )

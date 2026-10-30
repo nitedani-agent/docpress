@@ -209,11 +209,11 @@ function autoScroll() {
   if (!navLink) return
   // None of the following seems to be working: https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
   if (navLink.closest('.collapsible')!.classList.contains('collapsible-collapsed')) return
-  navLink.scrollIntoView({
-    behavior: 'instant',
-    block: 'center',
-    inline: 'start',
-  })
+  // Centered in the menu. Not `scrollIntoView()`: it also scrolls the page, and a scroll of the page closes the menu.
+  const container = document.getElementById('menu-modal-scroll-container')!
+  const linkRect = navLink.getBoundingClientRect()
+  container.scrollTop +=
+    linkRect.top - container.getBoundingClientRect().top - (container.clientHeight - linkRect.height) / 2
 }
 
 function closeMenuModalOnMouseLeave() {
