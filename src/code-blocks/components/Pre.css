@@ -1,5 +1,7 @@
 /* A recessed well: a few percent darker than the page, a faint ring as its edge, no shadow */
 pre {
+  /* The code's size, relative to the pre's (it shrinks on narrow screens, below) */
+  --code-font-scale: 1;
   display: grid;
   background: var(--dp-color-code-bg);
   border: 1px solid var(--dp-color-code-ring);
@@ -17,6 +19,7 @@ pre {
 }
 pre > code {
   overflow-x: auto;
+  font-size: calc(var(--code-font-scale) * 1em);
 }
 /* Shiki renders code with a language as lines (padded, so that a line's fill spans the block), without one as text */
 pre > code[data-language] {
@@ -40,30 +43,30 @@ figure[data-rehype-pretty-code-figure] {
 }
 /* 820px or narrower, code blocks shrink: so does their code */
 @container container-viewport (max-width: 820px) {
-  pre > code {
-    font-size: 0.9em;
+  pre {
+    --code-font-scale: 0.9;
   }
 }
 @container container-viewport (max-width: 720px) {
-  pre > code {
-    font-size: 0.8em;
+  pre {
+    --code-font-scale: 0.8;
   }
 }
 /* Touch devices (phones): smaller still, https://github.com/vikejs/vike/issues/2369#issuecomment-2803046966 */
 @media not all and (hover: hover) and (pointer: fine) {
   @container container-viewport (max-width: 620px) {
-    pre > code {
-      font-size: 0.7em;
+    pre {
+      --code-font-scale: 0.7;
     }
   }
   @container container-viewport (max-width: 550px) {
-    pre > code {
-      font-size: 0.6em;
+    pre {
+      --code-font-scale: 0.6;
     }
   }
   @container container-viewport (max-width: 450px) {
-    pre > code {
-      font-size: 0.5em;
+    pre {
+      --code-font-scale: 0.5;
     }
   }
 }
@@ -134,7 +137,9 @@ pre:has(.code-block-header) .copy-button {
   top: 6px;
 }
 pre:not(:has(.code-block-header)) .copy-button {
-  top: 15px;
+  /* 1lh: the pre's line height, which the code's scales (the code's padding: 16px) */
+  font: inherit;
+  top: calc(16px + (var(--code-font-scale) * 1lh - 26px) / 2);
 }
 /* Phones: the header doesn't dominate the (smaller) code */
 @container container-viewport (max-width: 550px) {
@@ -144,8 +149,5 @@ pre:not(:has(.code-block-header)) .copy-button {
   }
   pre:has(.code-block-header) .copy-button {
     top: 3px;
-  }
-  pre:not(:has(.code-block-header)) .copy-button {
-    top: 8px;
   }
 }
