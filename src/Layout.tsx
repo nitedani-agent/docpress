@@ -128,7 +128,10 @@ function Layout({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <div className={isLandingPage ? 'landing-page' : 'doc-page'} style={whitespaceBuster1}>
-        <header style={{ position: isTopNavSticky ? 'sticky' : 'relative', top: 0, zIndex: 100 }}>
+        <header
+          className={isTopNavSticky ? 'top-nav-sticky' : undefined}
+          style={{ position: isTopNavSticky ? 'sticky' : 'relative', top: 0, zIndex: 100 }}
+        >
           <NavHead hasCategoryTabs={hasCategoryTabs} />
           {isCategoryTabsShown && <CategoryTabs />}
           {/* <MenuModal> is inside here because `container-type` on the page wrapper traps `position: fixed` — https://github.com/brillout/docpress/pull/177 */}
@@ -440,25 +443,6 @@ function getStyleTopNavSticky() {
 /* Focused elements aren't hidden under the sticky top nav (its own don't scroll; for headings, see heading.css) */
 :where(a, button, input, select, textarea, summary, [tabindex]):where(:not(.doc-page > header *)):focus {
   scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px);
-}
-/* Scrolling down slides the category tabs under the top bar (CategoryTabs.tsx), unless they have the keyboard focus */
-html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
-  .has-category-tabs {
-    --nav-tabs-shown-height-end: 0px;
-  }
-  .category-tabs {
-    transform: translateY(-100%);
-  }
-  .category-tabs-content {
-    opacity: 0;
-  }
-  /* The strip the tabs leave lets the pointer through to the page */
-  .doc-page > header {
-    pointer-events: none;
-    & > * {
-      pointer-events: auto;
-    }
-  }
 }`
 }
 function getStyleLayout(isNavLeftAlwaysHidden: boolean) {

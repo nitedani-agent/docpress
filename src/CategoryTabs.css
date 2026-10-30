@@ -12,11 +12,30 @@
 }
 .category-tabs {
   position: relative;
-  /* Painted below the top bar: scrolling down slides the tabs up under it (Layout.tsx) */
+  /* Painted below the top bar: scrolling down slides the tabs up under it */
   z-index: -1;
   height: var(--nav-tabs-height);
   background: var(--dp-color-bg);
   transition: transform var(--dp-duration-reveal) var(--dp-ease-out);
+}
+/* Scrolling down slides the tabs under the sticky top bar (CategoryTabs.tsx), unless they have the keyboard focus */
+html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
+  .has-category-tabs:has(.top-nav-sticky) {
+    --nav-tabs-shown-height-end: 0px;
+  }
+  .top-nav-sticky {
+    /* The strip the tabs leave lets the pointer through to the page */
+    pointer-events: none;
+    & > * {
+      pointer-events: auto;
+    }
+    .category-tabs {
+      transform: translateY(-100%);
+    }
+    .category-tabs-content {
+      opacity: 0;
+    }
+  }
 }
 .category-tabs-content {
   display: flex;
