@@ -24,6 +24,10 @@ pre.has-diff .diff::before,
   /* biome-ignore format: */
   .diff-entire-file [data-line]::before {
   position: absolute;
+  /* Centered in the line's left padding (Pre.css): clear of the border and of the code, whatever the font */
+  left: 0;
+  width: 16px;
+  text-align: center;
   font-weight: 500;
 }
 
@@ -35,7 +39,6 @@ pre.has-diff .diff.add::before,
   color: var(--dp-color-diff-add);
   font-size: 1.2em;
   top: -1px;
-  left: 6px;
 }
 
 pre.has-diff .diff.remove::before,
@@ -46,5 +49,4 @@ pre.has-diff .diff.remove::before,
   color: var(--dp-color-diff-remove);
   font-size: 1.4em;
   top: -5px;
-  left: 5px;
 }
