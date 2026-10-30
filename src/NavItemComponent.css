@@ -43,6 +43,18 @@
       height: 16px;
     }
   }
+  /* The current category tab already names it: the first page or group label takes the breadcrumb's line */
+  .has-category-tabs & {
+    .nav-item-level-1 {
+      display: none;
+    }
+    .nav-item-level-1 + .nav-item-level-2 {
+      margin-top: 16px;
+    }
+    .nav-item-level-1 + .nav-item-level-4 {
+      margin-top: 24px;
+    }
+  }
   .nav-item-level-2,
   .nav-item-level-3 {
     margin: 0 12px 0 var(--nav-indent);

@@ -426,17 +426,14 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await expectWholeFocusRing('.nav-head-menu-toggle .text-menu')
   })
 
-  test(`${featuresURL} - the logo lines up with the left navigation's text and the first category tab's icon, and doesn't move between pages`, async () => {
+  test(`${featuresURL} - the logo lines up with the left navigation's text edge and the first category tab's icon, and doesn't move between pages`, async () => {
     const getLogoLeft = () =>
       page.evaluate(() => document.querySelector('.nav-head-logo img')?.getBoundingClientRect().left ?? null)
     await open(featuresURL, 'desktop')
-    const navLeftTextLeft = await page.evaluate(() => {
-      const navItem = document.querySelector('#nav-left .nav-item')
-      if (!navItem) return null
-      const range = document.createRange()
-      range.selectNodeContents(navItem)
-      return range.getBoundingClientRect().left
-    })
+    // The text edge: where the hairline of the left navigation's pages is
+    const navLeftTextLeft = await page.evaluate(
+      () => document.querySelector('#nav-left .nav-item-level-2')?.getBoundingClientRect().left ?? null,
+    )
     const logoLeft = await getLogoLeft()
     expect(logoLeft).toBe(navLeftTextLeft)
     // The logo doesn't move between pages
@@ -448,6 +445,13 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
     })
     expect(left.icon).toBe(left.logo)
+  })
+
+  test(`${featuresURL} - the left navigation doesn't repeat the category the current tab names`, async () => {
+    await open(featuresURL, 'desktop')
+    expect(await page.textContent('.category-tab.is-current')).toBe('Overview')
+    expect(await page.isVisible('#nav-left .nav-item-level-2')).toBe(true)
+    expect(await getVisibleText(page, '#nav-left')).not.toContain('Overview')
   })
 
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
