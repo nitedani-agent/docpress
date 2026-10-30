@@ -459,29 +459,9 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await withViewport({ width: 390, height: 844 }, async () => {
       await page.goto(getServerUrl() + featuresURL)
       await page.focus('.nav-head-menu-toggle')
-      const ring = await page.evaluate(() => {
-        const label = document.querySelector('.nav-head-menu-toggle .text-menu')!
-        const { outlineStyle, outlineOffset, outlineWidth } = getComputedStyle(label)
-        const outset = parseFloat(outlineOffset) + parseFloat(outlineWidth)
-        const r = label.getBoundingClientRect()
-        const clippedBy: string[] = []
-        for (let el = label.parentElement; el; el = el.parentElement) {
-          const { overflowX, overflowY } = getComputedStyle(el)
-          if (overflowX === 'visible' && overflowY === 'visible') continue
-          const box = el.getBoundingClientRect()
-          const left = box.left + el.clientLeft
-          const top = box.top + el.clientTop
-          const isInside =
-            r.left - outset >= left &&
-            r.top - outset >= top &&
-            r.right + outset <= left + el.clientWidth &&
-            r.bottom + outset <= top + el.clientHeight
-          if (!isInside) clippedBy.push(el.className)
-        }
-        return { outlineStyle, clippedBy }
-      })
+      const ring = await getFocusRing('.nav-head-menu-toggle .text-menu')
       expect(ring.outlineStyle).toBe('solid')
-      expect(ring.clippedBy.join(', ')).toBe('')
+      expect(ring.clippedBy).toBe('')
     })
   })
 
@@ -600,15 +580,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         { timeout: 5 * 1000 },
       )
       // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
-      const ring = await page.evaluate(() => {
-        const tab = document.activeElement!
-        const { outlineOffset, outlineWidth } = getComputedStyle(tab)
-        const outset = parseFloat(outlineOffset) + parseFloat(outlineWidth)
-        const tabRect = tab.getBoundingClientRect()
-        const rowRect = tab.closest('.category-tabs-content')!.getBoundingClientRect()
-        return { top: tabRect.top - outset - rowRect.top, bottom: rowRect.bottom - (tabRect.bottom + outset) }
-      })
-      expect(ring.top >= 0 && ring.bottom >= 0).toBe(true)
+      expect((await getFocusRing('.category-tab:focus')).clippedBy).toBe('')
     })
   })
 
@@ -654,6 +626,30 @@ async function getNavHeadHeight(): Promise<number> {
   )
   expect(navHeadHeight > 0).toBe(true)
   return navHeadHeight
+}
+// The ancestors whose overflow clips the focus ring of `selector`
+async function getFocusRing(selector: string) {
+  return await page.evaluate((selector) => {
+    const element = document.querySelector(selector)!
+    const { outlineStyle, outlineOffset, outlineWidth } = getComputedStyle(element)
+    const outset = parseFloat(outlineOffset) + parseFloat(outlineWidth)
+    const r = element.getBoundingClientRect()
+    const clippedBy: string[] = []
+    for (let el = element.parentElement; el; el = el.parentElement) {
+      const { overflowX, overflowY } = getComputedStyle(el)
+      if (overflowX === 'visible' && overflowY === 'visible') continue
+      const box = el.getBoundingClientRect()
+      const left = box.left + el.clientLeft
+      const top = box.top + el.clientTop
+      const isInside =
+        r.left - outset >= left &&
+        r.top - outset >= top &&
+        r.right + outset <= left + el.clientWidth &&
+        r.bottom + outset <= top + el.clientHeight
+      if (!isInside) clippedBy.push(el.className)
+    }
+    return { outlineStyle, clippedBy: clippedBy.join(', ') }
+  }, selector)
 }
 async function getVisibleText(page: Page, selector: string = 'body'): Promise<string> {
   return await page.evaluate((sel) => {
