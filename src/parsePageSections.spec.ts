@@ -22,6 +22,12 @@ describe('extractPageSections()', () => {
     expect(getIds(['## Setup', '## Install{#setup}'])).toEqual(['setup-1', 'setup'])
   })
 
+  it("accepts heading text that isn't MDX", () => {
+    expect(
+      getIds(['## The <head> tag', '## Using <Link>', '## Option {a: 1}', '## a <= b', '## Title {#broken']),
+    ).toEqual(['the-head-tag', 'using-link', 'option-a-1', 'a-b', 'title-broken'])
+  })
+
   it('skips code blocks and MDX comments', () => {
     const examples = [
       ['````md', '```js', '```', '### Setup', '````'],
