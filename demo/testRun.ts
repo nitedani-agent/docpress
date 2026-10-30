@@ -583,6 +583,8 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test('client-side navigation', async () => {
+    await page.goto(getServerUrl() + orphanURL)
+    await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
     await page.click('.nav-head a[href="/"]')
     await autoRetry(
       async () => {
