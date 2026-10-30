@@ -63,7 +63,7 @@ function extractPageSections(code: string) {
       if (/\*\/\s*\}/.test(line)) isComment = false
       return line
     }
-    if (/\{\s*\/\*(?![^]*\*\/\s*\})/.test(line)) {
+    if (/^ {0,3}\{\s*\/\*(?![^]*\*\/\s*\})/.test(line)) {
       isComment = true
       return line
     }
