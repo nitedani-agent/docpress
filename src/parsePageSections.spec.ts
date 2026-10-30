@@ -34,4 +34,9 @@ describe('extractPageSections', () => {
       { pageSectionId: 'custom-anchor', pageSectionLevel: 2, pageSectionTitle: 'Some Title' },
     ])
   })
+
+  it('leaves empty headings to MDX', () => {
+    const code = ['##', '## ', '## ###', '## ###\r'].join('\n')
+    expect(extractPageSections(code)).toEqual({ codeNew: code, pageSections: [] })
+  })
 })

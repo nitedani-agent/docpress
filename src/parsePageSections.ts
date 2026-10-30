@@ -57,7 +57,9 @@ function extractPageSections(code: string) {
         || line.startsWith('<h2')
         */
       ) {
-        const { pageSectionId, pageSectionLevel, pageSectionTitle, headingHtml } = parsePageSection(line)
+        const pageSection = parsePageSection(line)
+        if (!pageSection) return line
+        const { pageSectionId, pageSectionLevel, pageSectionTitle, headingHtml } = pageSection
         pageSections.push({ pageSectionId, pageSectionLevel, pageSectionTitle })
         return headingHtml
       }
@@ -68,7 +70,7 @@ function extractPageSections(code: string) {
   return { codeNew, pageSections }
 }
 
-function parsePageSection(line: string): PageSection & { headingHtml: string } {
+function parsePageSection(line: string): (PageSection & { headingHtml: string }) | null {
   // A file with Windows line endings (CRLF) has a `\r` at the end of each line
   // Same as Markdown: `##` then spaces or tabs, the title, and an optional closing sequence `##`
   const match = /^(#+)(?:[ \t]+(.*?))??(?:[ \t]+#+)?[ \t]*$/.exec(line.replace(/\r$/, ''))
@@ -76,7 +78,8 @@ function parsePageSection(line: string): PageSection & { headingHtml: string } {
   const pageSectionLevel = match[1]!.length
 
   const titleMdx = match[2]
-  assert(titleMdx, { line })
+  // An empty heading such as `##` isn't a page section: MDX renders it as written
+  if (!titleMdx) return null
 
   let pageSectionTitle = titleMdx
   let anchor = titleMdx
