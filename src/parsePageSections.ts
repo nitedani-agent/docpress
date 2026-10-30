@@ -130,11 +130,7 @@ function makeIdsUnique(headings: Heading[]) {
     const idBase = heading.pageSectionId
     if (idBase === null || heading.isCustomAnchor) return
     let id = idBase
-    let i = 0
-    while (idsTaken.has(id)) {
-      do id = `${idBase}-${++i}`
-      while (idsOwn.has(id))
-    }
+    for (let i = 1; idsTaken.has(id) || (id !== idBase && idsOwn.has(id)); i++) id = `${idBase}-${i}`
     heading.pageSectionId = id
     idsTaken.add(id)
   })
