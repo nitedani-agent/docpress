@@ -48,6 +48,9 @@ function initCategoryTabsHiding() {
     () => {
       const { scrollY } = window
       if (scrollY === scrollYLast) return
+      // Past the page's top or bottom: the elastic overscroll (Safari), not the reader scrolling back
+      const { scrollHeight, clientHeight } = document.documentElement
+      if (scrollY < 0 || scrollY > scrollHeight - clientHeight) return
       document.documentElement.classList.toggle('category-tabs-hidden', scrollY > 0 && scrollY > scrollYLast)
       scrollYLast = scrollY
     },
