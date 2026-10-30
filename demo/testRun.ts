@@ -454,15 +454,13 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await open(featuresURL, 'desktop')
     // A slide that outlasts the scroll: the rail is measured from where it ends up
     await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
-    // Scrolled down (the tabs slide away) until the "Code blocks" section ends in the middle of the strip they leave
-    const stripMiddle = (await getCssPx('--nav-head-height')) + (await getCssPx('--nav-tabs-height')) / 2
+    // Scrolled down (the tabs slide away) until the "Code blocks" section ends half a tab row below where the rail
+    // counts from (17px below the top bar, TocRail.tsx): still on screen, but not if the tabs were counted as shown
+    const sectionEnd = (await getCssPx('--nav-head-height')) + 17 + (await getCssPx('--nav-tabs-height')) / 2
     await page.evaluate(
-      (stripMiddle) =>
-        window.scrollTo(
-          0,
-          document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - stripMiddle,
-        ),
-      stripMiddle,
+      (sectionEnd) =>
+        window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - sectionEnd),
+      sectionEnd,
     )
     await autoRetry(
       async () => {
