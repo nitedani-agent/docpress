@@ -123,7 +123,13 @@ function Layout({ children }: { children: React.ReactNode }) {
     >
       {/* Before the markup it styles: the first paint has the right layout */}
       <Style>{getStyleLayout(isNavLeftAlwaysHidden)}</Style>
-      {isTopNavSticky && <Style>{getStyleTopNavSticky()}</Style>}
+      {/* Focused elements aren't hidden under the sticky top nav (its own don't scroll; for headings, see heading.css) */}
+      {isTopNavSticky && (
+        <Style>{css`
+:where(a, button, input, select, textarea, summary, [tabindex]):where(:not(.doc-page > header *)):focus {
+  scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px);
+}`}</Style>
+      )}
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -437,13 +443,6 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
       </div>
     </nav>
   )
-}
-function getStyleTopNavSticky() {
-  return css`
-/* Focused elements aren't hidden under the sticky top nav (its own don't scroll; for headings, see heading.css) */
-:where(a, button, input, select, textarea, summary, [tabindex]):where(:not(.doc-page > header *)):focus {
-  scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px);
-}`
 }
 function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   let style = ''
