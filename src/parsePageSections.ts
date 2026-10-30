@@ -74,9 +74,9 @@ function extractPageSections(code: string) {
   return { codeNew, pageSections }
 }
 
-type Heading = PageSection & { isCustomAnchor: boolean; indent: string }
+type HeadingLine = PageSection & { isCustomAnchor: boolean; indent: string }
 
-function parsePageSection(indent: string, pageSectionLevel: number, titleMdx: string): Heading {
+function parsePageSection(indent: string, pageSectionLevel: number, titleMdx: string): HeadingLine {
   let pageSectionTitle = titleMdx
   let anchor = titleMdx
   {
@@ -95,20 +95,21 @@ function parsePageSection(indent: string, pageSectionLevel: number, titleMdx: st
 
 // A page may repeat a heading title: `#setup`, `#setup-1`, ... (like GitHub). A heading keeps its own id unless a custom
 // anchor or an earlier heading has it, and a suffix never takes another heading's own id.
-function makeIdsUnique(headings: Heading[]) {
+function makeIdsUnique(headings: HeadingLine[]) {
   const idsOwn = new Set(headings.map((heading) => heading.pageSectionId))
-  const idsTaken = new Set<string>()
+  const customAnchors = new Map<string, HeadingLine>()
+  const getMdx = (h: HeadingLine) => pc.bold(`${'#'.repeat(h.pageSectionLevel)} ${h.pageSectionTitle}`)
   headings.forEach((heading) => {
     const id = heading.pageSectionId
     if (!heading.isCustomAnchor || id === null) return
-    const first = headings.find((h) => h.isCustomAnchor && h.pageSectionId === id)!
-    const getMdx = (h: Heading) => pc.bold(`${'#'.repeat(h.pageSectionLevel)} ${h.pageSectionTitle}`)
+    const first = customAnchors.get(id) ?? heading
     assertUsage(
       first === heading,
       `The headings ${getMdx(first)} and ${getMdx(heading)} have the same URL hash ${pc.bold(`#${id}`)}, give them different {#custom-anchor}`,
     )
-    idsTaken.add(id)
+    customAnchors.set(id, heading)
   })
+  const idsTaken = new Set(customAnchors.keys())
   headings.forEach((heading) => {
     const idBase = heading.pageSectionId
     if (idBase === null || heading.isCustomAnchor) return
@@ -119,7 +120,7 @@ function makeIdsUnique(headings: Heading[]) {
   })
 }
 
-function getHeadingHtml({ pageSectionLevel, pageSectionTitle, pageSectionId, indent }: Heading): string {
+function getHeadingHtml({ pageSectionLevel, pageSectionTitle, pageSectionId, indent }: HeadingLine): string {
   const titleParsed = parseMarkdownMini(pageSectionTitle)
   const headingId = pageSectionId === null ? '' : ` id="${pageSectionId}"`
   return `${indent}<h${pageSectionLevel}${headingId}>${titleParsed}</h${pageSectionLevel}>`
