@@ -97,7 +97,7 @@ function getSelfOriginRegExp(docsUrl: string): RegExp {
   return new RegExp(`^https?://(www\\.)?${hostnameEscaped}(?=[/?#]|$)`, 'i')
 }
 
-/** All pages, by URL, and the usage errors of their headings (e.g. two headings with the same custom anchor) */
+/** All pages, by URL, and their errors: invalid MDX, or a usage error of their headings (e.g. two headings with the same custom anchor) */
 function getPages(files: string[], root: string): { pages: Docs['pages']; pageErrors: string[] } {
   const pages: Docs['pages'] = new Map()
   const pageErrors: string[] = []
@@ -110,11 +110,16 @@ function getPages(files: string[], root: string): { pages: Docs['pages']; pageEr
       try {
         anchors = getAnchors(fs.readFileSync(filePath, 'utf8'))
       } catch (err) {
+        const name = path.relative(root, filePath).split(path.sep).join('/')
         const usageErrorPrefix = '[DocPress][Wrong Usage] '
-        if (!(err instanceof Error) || !err.message.startsWith(usageErrorPrefix)) throw err
-        pageErrors.push(
-          `${path.relative(root, filePath).split(path.sep).join('/')}: ${err.message.slice(usageErrorPrefix.length)}`,
-        )
+        if (err instanceof Error && err.message.startsWith(usageErrorPrefix)) {
+          pageErrors.push(`${name}: ${err.message.slice(usageErrorPrefix.length)}`)
+        } else if (err instanceof Error && 'reason' in err && 'line' in err) {
+          // The page isn't valid MDX
+          pageErrors.push(`${name}:${err.line}: ${err.reason}`)
+        } else {
+          throw err
+        }
       }
     }
     pages.set(url, anchors)
