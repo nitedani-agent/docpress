@@ -454,23 +454,23 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(await getVisibleText(page, '#navigation-container')).not.toContain('Overview')
   })
 
-  test(`${featuresURL} - the sides stay put when the category tabs hide, which reveals the category's title`, async () => {
+  test(`${featuresURL} - the top bar names the category while the category tabs are hidden, and nothing else in it or the sides moves`, async () => {
     await open(featuresURL, 'desktop')
-    const getSides = () =>
+    const getRects = () =>
       page.evaluate(() =>
-        ['#navigation-container', '.toc-rail-sticky']
+        ['.nav-head-logo', '.search-link', '.nav-head-secondary', '#navigation-container', '.toc-rail-sticky']
           .map((selector) => {
-            const { top, height } = document.querySelector(selector)!.getBoundingClientRect()
-            return `${selector}: ${top}px, ${height}px high`
+            const { left, top, width, height } = document.querySelector(selector)!.getBoundingClientRect()
+            return `${selector}: ${left}px, ${top}px, ${width}x${height}`
           })
           .join('; '),
       )
-    // Under the tabs: the left's top shows it only once they're hidden
-    const isTitleOnTop = () =>
+    const getCategory = () =>
       page.evaluate(() => {
-        const { left, top, height } = document.querySelector('.nav-left-category')!.getBoundingClientRect()
-        return !!document.elementFromPoint(left + 1, top + height / 2)!.closest('.nav-left-category')
+        const { visibility, opacity } = getComputedStyle(document.querySelector('.nav-head-category')!)
+        return `${visibility}, opacity ${opacity}`
       })
+    expect(await page.textContent('.nav-head-category')).toBe('Overview')
     await scrollTo(1200)
     await scrollTo(1199)
     await autoRetry(
@@ -479,23 +479,25 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         expect(await page.evaluate(() => getComputedStyle(document.querySelector('.category-tabs')!).transform)).toBe(
           'none',
         )
+        expect(await getCategory()).toBe('hidden, opacity 0')
       },
       { timeout: 5 * 1000 },
     )
-    const sides = await getSides()
+    const rects = await getRects()
     await scrollTo(1200)
-    expect(await getSides()).toBe(sides)
+    expect(await getRects()).toBe(rects)
     await autoRetry(
       async () => {
-        expect(await getSides()).toBe(sides)
-        expect(await isTitleOnTop()).toBe(true)
+        expect(await isCategoryTabsHidden()).toBe(true)
+        expect(await getRects()).toBe(rects)
+        expect(await getCategory()).toBe('visible, opacity 1')
       },
       { timeout: 5 * 1000 },
     )
-    // Shown again: they cover it
+    // Shown again: the current tab names it
     await scrollTo(1199)
-    await autoRetry(async () => expect(await isTitleOnTop()).toBe(false), { timeout: 5 * 1000 })
-    expect(await getSides()).toBe(sides)
+    await autoRetry(async () => expect(await getCategory()).toBe('hidden, opacity 0'), { timeout: 5 * 1000 })
+    expect(await getRects()).toBe(rects)
   })
 
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {

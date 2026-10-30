@@ -43,22 +43,11 @@
       height: 16px;
     }
   }
-  /* Only where the top nav is sticky (below): elsewhere the tabs scroll away and the list keeps its heading */
-  .nav-left-category {
-    display: none;
-  }
-  /* The current category tab already names it: the first page or group label takes the breadcrumb's line */
+  /* The current category tab, or the top bar while the tabs are hidden, already names it: the first page or group label
+   * takes the breadcrumb's line. Only where the top nav is sticky: elsewhere the tabs scroll away. */
   .has-category-tabs:has(.top-nav-sticky) & {
-    .navigation-content .nav-item-level-1 {
+    .nav-item-level-1 {
       display: none;
-    }
-    /* Above the list, under the tabs: shown when they slide away (Layout.tsx) */
-    .nav-left-category {
-      display: inline-flex;
-      position: absolute;
-      bottom: 100%;
-      height: var(--nav-tabs-height);
-      margin: 0 0 0 var(--nav-indent);
     }
     .nav-item-level-1 + .nav-item-level-2 {
       margin-top: 16px;

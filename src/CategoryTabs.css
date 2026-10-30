@@ -27,6 +27,10 @@ html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
     .category-tabs-content {
       opacity: 0;
     }
+    .nav-head-category {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
 .category-tabs-content {
@@ -88,5 +92,24 @@ html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
   .category-tab.is-current &,
   .category-tab:hover & {
     filter: none;
+  }
+}
+/* The current category in the top bar (CategoryTabs.tsx). Laid out also while hidden: the bar's items don't move. */
+.nav-head-category {
+  height: 100%;
+  padding-left: var(--padding-side);
+  /* The divider after the logo */
+  background: linear-gradient(var(--dp-color-border), var(--dp-color-border)) left center / 1px 20px no-repeat;
+  opacity: 0;
+  /* Also unfocusable */
+  visibility: hidden;
+  transition: opacity var(--dp-duration-reveal) var(--dp-ease-out), visibility var(--dp-duration-reveal);
+  &.is-current::after {
+    left: var(--padding-side);
+  }
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
   }
 }

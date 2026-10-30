@@ -34,7 +34,7 @@ import { cls } from './utils/cls.js'
 import { iconBooks } from './icons/index.js'
 import { PageHeader, PageFooter } from './PageChrome.js'
 import { TocRail, tocRailWidth, viewTocRail } from './TocRail.js'
-import { CategoryTabs } from './CategoryTabs.js'
+import { CategoryTabs, NavHeadCategory } from './CategoryTabs.js'
 import { ThemeToggle } from './theme/ThemeToggle.js'
 import './Layout.css'
 
@@ -134,7 +134,10 @@ function Layout({ children }: { children: React.ReactNode }) {
           className={isTopNavSticky ? 'top-nav-sticky' : undefined}
           style={{ position: isTopNavSticky ? 'sticky' : 'relative', top: 0, zIndex: 100 }}
         >
-          <NavHead hasSeveralCategories={hasSeveralCategories} />
+          <NavHead
+            hasSeveralCategories={hasSeveralCategories}
+            hasCategoryInBar={isCategoryTabsShown && isTopNavSticky}
+          />
           {isCategoryTabsShown && <CategoryTabs />}
           {/* <MenuModal> is inside here because `container-type` on the page wrapper traps `position: fixed` — https://github.com/brillout/docpress/pull/177 */}
           <MenuModal />
@@ -281,9 +284,7 @@ function PageContent({ children }: { children: React.ReactNode }) {
 
 function NavLeft() {
   const pageContext = usePageContext()
-  const { navItemsAll, navItemsDetached, categories } = pageContext.resolved
-  // With the category tabs (Layout()): under them, and shown when they hide (NavItemComponent.css)
-  const categoryCurrent = categories.length > 1 && categories.find((category) => category.isCurrent)
+  const { navItemsAll, navItemsDetached } = pageContext.resolved
   return (
     <>
       <Style>{getStyleNavLeft()}</Style>
@@ -306,12 +307,6 @@ function NavLeft() {
             top: 'var(--nav-head-sticky-offset)',
           }}
         >
-          {categoryCurrent && (
-            <span className="nav-item-level-1 nav-left-category" style={{ '--color-category': categoryCurrent.color }}>
-              {categoryCurrent.titleIcon && <img src={categoryCurrent.titleIcon} alt="" />}
-              {parseMarkdownMini(categoryCurrent.title)}
-            </span>
-          )}
           <div
             id="navigation-container"
             className="scroll-fade"
@@ -366,7 +361,10 @@ function NavigationContent(props: {
   )
 }
 
-function NavHead({ hasSeveralCategories }: { hasSeveralCategories: boolean }) {
+function NavHead({
+  hasSeveralCategories,
+  hasCategoryInBar,
+}: { hasSeveralCategories: boolean; hasCategoryInBar: boolean }) {
   const pageContext = usePageContext()
   const {
     navMaxWidth,
@@ -434,7 +432,15 @@ function NavHead({ hasSeveralCategories }: { hasSeveralCategories: boolean }) {
             color: 'var(--dp-color-muted)',
           }}
         >
-          {!hideNavHeadLogo && <NavHeadLogo />}
+          {hasCategoryInBar ? (
+            // One cell (also of the search-centered bar's grid): the category comes after the logo
+            <div className="nav-head-start">
+              <NavHeadLogo />
+              <NavHeadCategory />
+            </div>
+          ) : (
+            !hideNavHeadLogo && <NavHeadLogo />
+          )}
           {navMaxWidth && !isSearchCentered && <div className="desktop-grow" />}
           {algolia && <SearchLink />}
           {/* On desktop, it's in <ExternalLinks> */}
@@ -459,6 +465,10 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
 }
 .nav-head-content {
   display: flex;
+}
+.nav-head-start {
+  display: flex;
+  height: 100%;
 }
 .nav-head-logo {
   display: flex;
@@ -506,7 +516,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .nav-head-content:not(:has(> .nav-head-theme-toggle)) > * {
     flex-grow: 1;
   }
-  .nav-head-content:has(> .nav-head-theme-toggle) > .nav-head-logo {
+  .nav-head-content:has(> .nav-head-theme-toggle) > :is(.nav-head-logo, .nav-head-start) {
     flex-grow: 1;
   }
   .nav-head .nav-head-menu-toggle {
@@ -534,7 +544,8 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .desktop-grow,
   .text-docs,
   .caret-icon,
-  .category-tabs {
+  .category-tabs,
+  .nav-head-category {
     display: none;
   }
   /* The ring hugs the icon and the label (the cell is tight here) */
