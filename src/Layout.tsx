@@ -793,7 +793,6 @@ function NavHeadLogo() {
     ev.preventDefault()
     // Imported lazily: a static import closes a chunk cycle through vike's navigate.ts -> initClientRouter import
     import('vike/client/router').then(({ navigate }) => {
-      // @ts-ignore TODO/now Will be fixed in the next Vike version — remove this @ts-expect-error then.
       navigate('/press#logo')
     })
   }
