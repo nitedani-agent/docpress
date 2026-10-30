@@ -434,8 +434,8 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
 }
 function getStyleTopNavSticky() {
   return css`
-/* Focused elements aren't hidden under the sticky top nav (for headings, see heading.css) */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus {
+/* Focused elements aren't hidden under the sticky top nav (its own don't scroll; for headings, see heading.css) */
+:where(a, button, input, select, textarea, summary, [tabindex]):where(:not(.doc-page > header *)):focus {
   scroll-margin-top: calc(var(--nav-head-sticky-offset) + 16px);
 }
 /* Scrolling down slides the category tabs under the top bar (CategoryTabs.tsx), unless they have the keyboard focus */
