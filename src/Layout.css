@@ -18,26 +18,25 @@ body {
   justify-content: center;
   height: 100%;
   padding: 0 var(--padding-side);
-  overflow: hidden;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
   @media (hover: hover) and (pointer: fine) {
     .link-hover-animation &:hover::before {
-      top: 0;
+      clip-path: inset(0);
     }
     html.menu-modal-show & {
       cursor: default;
     }
   }
+  /* Clipped, not the toggle: a focus ring around its content isn't cut off */
   &::before {
     position: absolute;
     content: '';
-    height: 100%;
-    width: 100%;
-    top: var(--nav-head-height);
+    inset: 0;
+    clip-path: inset(100% 0 0);
     background-color: var(--dp-color-surface-hover);
-    transition: top var(--transition-menu-toggle-duration) ease;
+    transition: clip-path var(--transition-menu-toggle-duration) ease;
     z-index: -1;
   }
   & .caret-icon-left,

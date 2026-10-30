@@ -5,8 +5,9 @@
   outline: 2px solid var(--dp-color-primary);
   outline-offset: 2px;
 }
-/* Full-height cells of the top bar and of the category tabs (their row scrolls sideways: it clips): ring inside, like the menu toggles' */
+/* Full-height cells of the top bar and of the category tabs (their row scrolls sideways: it clips): ring inside */
 .nav-head a:focus-visible:not(.icon-button, .version-badge),
+.menu-toggle:focus-visible,
 .category-tab:focus-visible {
   outline-offset: -3px;
   border-radius: var(--dp-radius-md);
@@ -52,11 +53,6 @@
 /* DocSearch draws its own focus state */
 .DocSearch-Input:focus-visible {
   outline: none;
-}
-/* Clipped by `overflow: hidden` (the hover slide-in): draw the ring inside */
-.menu-toggle:focus-visible {
-  outline-offset: -3px;
-  border-radius: var(--dp-radius-md);
 }
 /* Navigation rows (sidebar, menus, rail): the ring inside the row, rounded like the other rings */
 :is(.nav-item, .toc-item):focus-visible {

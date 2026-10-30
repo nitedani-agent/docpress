@@ -632,7 +632,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
       filter: grayscale(0) opacity(1);
     }
     &::before {
-      top: 0;
+      clip-path: inset(0);
     }
     & .caret-icon-left {
       transform: rotate(-90deg);
