@@ -93,8 +93,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   // user decision 2026-10-30: the two-row header is the only design
   // The second row: the categories as tabs (doc pages, desktop), for a site with more than one category
-  const hasCategoryTabs = pageContext.resolved.categories.length > 1
-  const isCategoryTabsShown = hasCategoryTabs && !isLandingPage
+  const hasSeveralCategories = pageContext.resolved.categories.length > 1
+  const isCategoryTabsShown = hasSeveralCategories && !isLandingPage
   return (
     <div
       className={isCategoryTabsShown ? 'has-category-tabs' : undefined}
@@ -138,7 +138,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           className={isTopNavSticky ? 'top-nav-sticky' : undefined}
           style={{ position: isTopNavSticky ? 'sticky' : 'relative', top: 0, zIndex: 100 }}
         >
-          <NavHead hasCategoryTabs={hasCategoryTabs} />
+          <NavHead hasSeveralCategories={hasSeveralCategories} />
           {isCategoryTabsShown && <CategoryTabs />}
           {/* <MenuModal> is inside here because `container-type` on the page wrapper traps `position: fixed` — https://github.com/brillout/docpress/pull/177 */}
           <MenuModal />
@@ -361,7 +361,7 @@ function NavigationContent(props: {
   )
 }
 
-function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
+function NavHead({ hasSeveralCategories }: { hasSeveralCategories: boolean }) {
   const pageContext = usePageContext()
   const {
     navMaxWidth,
@@ -375,12 +375,12 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
   const hideNavHeadLogo = isLandingPage && !navMaxWidth
   // With category tabs, the landing page's "Docs" is a link into the docs, where the tabs take over (on desktop)
   const docsUrl =
-    hasCategoryTabs && isLandingPage
+    hasSeveralCategories && isLandingPage
       ? (docsUrlSetting ?? pageContext.resolved.categories.flatMap((category) => category.pages)[0]?.url)
       : undefined
   // The category tabs without `topNavigation`: the search centered in the bar, "Docs" next to it on the landing page
   // (the search doesn't move between the landing page and the docs)
-  const isSearchCentered = !!navMaxWidth && hasCategoryTabs && !topNavigation && !!algolia
+  const isSearchCentered = !!navMaxWidth && hasSeveralCategories && !topNavigation && !!algolia
 
   const navHeadSecondary = (
     <div className="nav-head-secondary">
