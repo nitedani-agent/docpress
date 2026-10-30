@@ -459,9 +459,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await withViewport({ width: 390, height: 844 }, async () => {
       await page.goto(getServerUrl() + featuresURL)
       await page.focus('.nav-head-menu-toggle')
-      const ring = await getFocusRing('.nav-head-menu-toggle .text-menu')
-      expect(ring.outlineStyle).toBe('solid')
-      expect(ring.clippedBy).toBe('')
+      await expectWholeFocusRing('.nav-head-menu-toggle .text-menu')
     })
   })
 
@@ -580,7 +578,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         { timeout: 5 * 1000 },
       )
       // The focus ring isn't clipped by the tabs' row (it scrolls sideways)
-      expect((await getFocusRing('.category-tab:focus')).clippedBy).toBe('')
+      await expectWholeFocusRing('.category-tab:focus')
     })
   })
 
@@ -627,9 +625,9 @@ async function getNavHeadHeight(): Promise<number> {
   expect(navHeadHeight > 0).toBe(true)
   return navHeadHeight
 }
-// The ancestors whose overflow clips the focus ring of `selector`
-async function getFocusRing(selector: string) {
-  return await page.evaluate((selector) => {
+// The focus ring of `selector` is drawn and no ancestor's overflow cuts it off (`clip-path` and `contain` aren't checked)
+async function expectWholeFocusRing(selector: string) {
+  const ring = await page.evaluate((selector) => {
     const element = document.querySelector(selector)!
     const { outlineStyle, outlineOffset, outlineWidth } = getComputedStyle(element)
     const outset = parseFloat(outlineOffset) + parseFloat(outlineWidth)
@@ -646,10 +644,12 @@ async function getFocusRing(selector: string) {
         r.top - outset >= top &&
         r.right + outset <= left + el.clientWidth &&
         r.bottom + outset <= top + el.clientHeight
-      if (!isInside) clippedBy.push(el.className)
+      if (!isInside) clippedBy.push(`${el.tagName.toLowerCase()}.${el.className}`)
     }
     return { outlineStyle, clippedBy: clippedBy.join(', ') }
   }, selector)
+  expect(ring.outlineStyle).not.toBe('none')
+  expect(ring.clippedBy).toBe('')
 }
 async function getVisibleText(page: Page, selector: string = 'body'): Promise<string> {
   return await page.evaluate((sel) => {
