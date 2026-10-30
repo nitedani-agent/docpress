@@ -5,7 +5,6 @@ export type { PageSection }
 import type { PluginOption } from 'vite'
 import { assert } from './utils/assert.js'
 import { determineSectionUrlHash } from './utils/determineSectionUrlHash.js'
-import os from 'os'
 
 type PageSection = {
   pageSectionTitle: string
@@ -70,7 +69,8 @@ function extractPageSections(code: string) {
 }
 
 function parsePageSection(line: string): PageSection & { headingHtml: string } {
-  const [lineBegin, ...lineWords] = line.split(' ')
+  // A file with Windows line endings (CRLF) has a `\r` at the end of each line
+  const [lineBegin, ...lineWords] = line.replace(/\r$/, '').split(' ')
   assert(lineBegin!.split('#').join('') === '', { line, lineWords })
   const pageSectionLevel = lineBegin!.length
 
@@ -141,15 +141,7 @@ function parseMarkdownMini(titleMarkdown: string): string {
   return titleHtml
 
   function serializeText(text: string) {
-    let textEscaped = text.split("'").join("\\'")
-    // https://github.com/brillout/docpress/pull/2
-    if (isWindows()) {
-      textEscaped = textEscaped.replace(/\r/, '')
-    }
+    const textEscaped = text.split("'").join("\\'")
     return `{'${textEscaped}'}`
   }
-}
-
-function isWindows() {
-  return os.platform() === 'win32'
 }
