@@ -48,9 +48,13 @@ type Docs = {
 function lint(root: string) {
   const files = crawl(root)
   const docsUrl = getDocsUrl(files, root)
-  const docs: Docs = { root, selfOrigin: getSelfOriginRegExp(docsUrl), pages: getPages(files, root) }
+  const { pages, pageErrors } = getPages(files, root)
+  const docs: Docs = { root, selfOrigin: getSelfOriginRegExp(docsUrl), pages }
   const sources = getSources(files, root)
-  const errors = sources.flatMap((source) => getLinks(source).flatMap((link) => lintLink(link, source, docs)))
+  const errors = [
+    ...pageErrors,
+    ...sources.flatMap((source) => getLinks(source).flatMap((link) => lintLink(link, source, docs))),
+  ]
   const count = (kind: Source['kind']) => sources.filter((source) => source.kind === kind).length
   const stats = { docsUrl, pages: count('page'), components: count('component'), readmes: count('readme') }
   return { errors, stats }
@@ -93,16 +97,29 @@ function getSelfOriginRegExp(docsUrl: string): RegExp {
   return new RegExp(`^https?://(www\\.)?${hostnameEscaped}(?=[/?#]|$)`, 'i')
 }
 
-/** All pages, by URL */
-function getPages(files: string[], root: string): Docs['pages'] {
+/** All pages, by URL, and the usage errors of their headings (e.g. two headings with the same custom anchor) */
+function getPages(files: string[], root: string): { pages: Docs['pages']; pageErrors: string[] } {
   const pages: Docs['pages'] = new Map()
+  const pageErrors: string[] = []
   for (const filePath of files) {
     if (!path.basename(filePath).startsWith('+Page.')) continue
     const url = getPageUrl(filePath, root)
     if (url === null) continue
-    pages.set(url, filePath.endsWith('.mdx') ? getAnchors(fs.readFileSync(filePath, 'utf8')) : null)
+    let anchors: Set<string> | null = null
+    if (filePath.endsWith('.mdx')) {
+      try {
+        anchors = getAnchors(fs.readFileSync(filePath, 'utf8'))
+      } catch (err) {
+        const usageErrorPrefix = '[DocPress][Wrong Usage] '
+        if (!(err instanceof Error) || !err.message.startsWith(usageErrorPrefix)) throw err
+        pageErrors.push(
+          `${path.relative(root, filePath).split(path.sep).join('/')}: ${err.message.slice(usageErrorPrefix.length)}`,
+        )
+      }
+    }
+    pages.set(url, anchors)
   }
-  return pages
+  return { pages, pageErrors }
 }
 
 /** The URL of a page — `null` if it can't be determined statically (Route Function or parameterized Route String) */

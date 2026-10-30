@@ -63,6 +63,16 @@ describe('docpress lint', () => {
     ])
   })
 
+  it('reports two headings with the same custom anchor', () => {
+    const { errors } = lintRepo({
+      'docs/pages/some-page/+Page.mdx': ['## Setup{#stable}', '### Install{#stable}'].join('\n'),
+      'docs/pages/other-page/+Page.mdx': '<Link href="/some-page#stable" />',
+    })
+    expect(errors).toEqual([
+      'pages/some-page/+Page.mdx: The headings ## Setup and ### Install have the same URL hash #stable, give them different {#custom-anchor}',
+    ])
+  })
+
   it('detects broken anchors and unknown pages', () => {
     const { errors } = lintRepo({
       'docs/pages/some-page/+Page.mdx': '## Some section',
