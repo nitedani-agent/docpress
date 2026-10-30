@@ -182,10 +182,7 @@ function measurePage(ids: string[], rail: HTMLElement, jumpedTo: number) {
     return heading?.getClientRects().length ? heading : null
   })
   const tops = headings.map((heading) => (heading ? heading.getBoundingClientRect().top : null))
-  // Below where the rail sticks once the category tabs are done sliding (a scroll can end before the slide does) and
-  // the gap a heading jumped to keeps above it (heading.css), plus a px (the jump lands on a whole px, the heading up to
-  // 1px lower). Just jumped to a heading: below where it landed, which is also clear of the tabs a jump down hid: the
-  // section above isn't on screen.
+  // Below where the rail sticks once the tabs stop sliding (+17: a jumped-to heading's 16px gap and a px); after a jump, below where the heading landed
   const jumpedToHeading = headings[jumpedTo]
   const viewTop = jumpedToHeading
     ? parseFloat(getComputedStyle(jumpedToHeading).scrollMarginTop) + 1

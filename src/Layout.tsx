@@ -102,7 +102,6 @@ function Layout({ children }: { children: React.ReactNode }) {
         ['--block-margin']: `${blockMargin}px`,
         ['--nav-head-height']: `${navHeadHeight}px`,
         // Offset for jumps and focus below the sticky top nav, clear of the category tabs that scrolling up brings back
-        // (The category tabs' height, see getStyleLayout())
         ['--nav-head-sticky-offset']: isTopNavSticky
           ? 'calc(var(--nav-head-height) + var(--nav-tabs-height, 0px))'
           : '0px',

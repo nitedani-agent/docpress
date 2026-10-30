@@ -1,6 +1,5 @@
 /* CategoryTabs.tsx: shown on desktop, see Layout.tsx */
-/* The tabs' height below the top bar, followed by the sticky left navigation and "On this page" (Layout.tsx): animated
-   as they slide, and where they end up (0 once scrolling down hid them, Layout.tsx) */
+/* Animated: the sticky left nav and "On this page" follow it (Layout.tsx) */
 @property --nav-tabs-shown-height {
   syntax: '<length>';
   inherits: true;
