@@ -448,8 +448,14 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       // A slide that outlasts the scroll: the rail is measured from where it ends up
       await page.addStyleTag({ content: ':root { --dp-duration-reveal: 60s; }' })
       // Scrolled down (the tabs slide away) until the "Code blocks" section ends 40px below the top bar
-      await page.evaluate(() =>
-        window.scrollTo(0, document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - 63 - 40),
+      const navHeadHeight = await getNavHeadHeight()
+      await page.evaluate(
+        (navHeadHeight) =>
+          window.scrollTo(
+            0,
+            document.getElementById('basic')!.getBoundingClientRect().top + window.scrollY - navHeadHeight - 40,
+          ),
+        navHeadHeight,
       )
       await autoRetry(
         async () => {
@@ -487,13 +493,15 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
       const isHidden = () => page.evaluate(() => document.documentElement.classList.contains('category-tabs-hidden'))
       const scrollTo = (y: number) => page.evaluate((y) => window.scrollTo(0, y), y)
+      const navHeadHeight = await getNavHeadHeight()
       await scrollTo(1200)
       await autoRetry(
         async () => {
           expect(await isHidden()).toBe(true)
           // The strip the tabs leave, 20px below the top bar, is the page's
           const isStripClickable = await page.evaluate(
-            () => !document.elementFromPoint(700, 63 + 20)!.closest('header'),
+            (y) => !document.elementFromPoint(700, y)!.closest('header'),
+            navHeadHeight + 20,
           )
           expect(isStripClickable).toBe(true)
         },
@@ -558,6 +566,13 @@ async function withViewport<T>(size: { width: number; height: number }, fn: () =
   const result = await fn()
   await page.setViewportSize(sizeBefore)
   return result
+}
+async function getNavHeadHeight(): Promise<number> {
+  const navHeadHeight = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('.nav-head')!).getPropertyValue('--nav-head-height')),
+  )
+  expect(navHeadHeight > 0).toBe(true)
+  return navHeadHeight
 }
 async function getVisibleText(page: Page, selector: string = 'body'): Promise<string> {
   return await page.evaluate((sel) => {
