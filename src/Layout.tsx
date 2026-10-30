@@ -459,6 +459,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   display: flex;
   align-items: center;
   height: 100%;
+  padding-left: var(--nav-head-indent);
   padding-right: var(--padding-side);
   color: inherit;
 }
@@ -475,15 +476,16 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   /* The site's own top nav links (\`topNavigation\`) don't wrap */
   white-space: nowrap;
 }
-/* The logo lines up with the left navigation's text (also on pages without it: the logo doesn't move between pages) */
+/* The logo and the first category tab's icon line up with the left navigation's text (also on pages without it: the
+   logo doesn't move between pages) */
 @container container-viewport (width < ${viewDesktop}px) {
-  .nav-head-logo {
-    padding-left: var(--main-view-padding);
+  :is(.doc-page, .landing-page) {
+    --nav-head-indent: var(--main-view-padding);
   }
 }
 @container container-viewport (width >= ${viewDesktop}px) {
-  .nav-head-logo {
-    padding-left: var(--nav-indent);
+  :is(.doc-page, .landing-page) {
+    --nav-head-indent: var(--nav-indent);
   }
 }`
 

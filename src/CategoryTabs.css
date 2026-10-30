@@ -42,8 +42,8 @@ html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
   display: flex;
   height: 100%;
   gap: 2px;
-  /* The first tab's icon on the left navigation's text edge */
-  padding: 0 var(--main-view-padding) 0 calc(var(--nav-indent) - 10px);
+  /* The first tab's icon under the logo (Layout.tsx) */
+  padding: 0 var(--main-view-padding) 0 calc(var(--nav-head-indent) - 10px);
   overflow-x: auto;
   scrollbar-width: none;
   transition: opacity var(--dp-duration-reveal) var(--dp-ease-out);

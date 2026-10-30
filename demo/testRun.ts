@@ -441,6 +441,18 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(await isMenuToggleShown('/tiny', 1366)).toBe(true)
   })
 
+  test(`${featuresURL} - the first category tab's icon under the logo`, async () => {
+    // Desktop, too narrow for the left navigation
+    await withViewport({ width: 1040, height: 720 }, async () => {
+      await page.goto(getServerUrl() + featuresURL)
+      const left = await page.evaluate(() => {
+        const getLeft = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().left
+        return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
+      })
+      expect(left.icon).toBe(left.logo)
+    })
+  })
+
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
     await withViewport({ width: 1440, height: 900 }, async () => {
       await page.goto(getServerUrl() + featuresURL)
