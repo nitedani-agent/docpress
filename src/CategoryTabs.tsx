@@ -7,7 +7,7 @@ import { bodyMaxWidth, barShadow } from './Layout.js'
 import { cls } from './utils/cls.js'
 import './CategoryTabs.css'
 
-// `categoryTabs`: the categories (level-1 headings) as tabs below the top bar (desktop), each linking to its first page.
+// The categories (level-1 headings) as tabs below the top bar (desktop), each linking to its first page.
 // The current page's category is underlined in its color. The left navigation lists the category's pages.
 function CategoryTabs() {
   const { categories } = usePageContext().resolved

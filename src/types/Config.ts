@@ -49,17 +49,8 @@ type Config = {
   tocProgress?: boolean
 
   /**
-   * Show the categories (the level-1 headings) as tabs below the top bar, on desktop, instead of the "Docs" menu. Each tab
-   * links to its category's first page; the left navigation lists the category's pages. On the landing page, "Docs" is a
-   * link to the docs' entry page (see `docsUrl`).
-   *
-   * @default false
-   */
-  categoryTabs?: boolean
-
-  /**
-   * The docs' entry page: where the landing page's "Docs" link goes (with `categoryTabs`). For example a docs home, a
-   * page listing the categories with `<DocsOverview />`.
+   * The docs' entry page: where the landing page's "Docs" link goes. For example a docs home, a page listing the
+   * categories with `<DocsOverview />`.
    *
    * @default The first category's first page
    */

@@ -1,4 +1,4 @@
-/* `categoryTabs` (CategoryTabs.tsx): shown on desktop, see Layout.tsx */
+/* CategoryTabs.tsx: shown on desktop, see Layout.tsx */
 .category-tabs {
   position: relative;
   height: var(--nav-tabs-height);

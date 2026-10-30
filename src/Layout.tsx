@@ -91,10 +91,13 @@ function Layout({ children }: { children: React.ReactNode }) {
     <LayoutDocsPage isNavLeftAlwaysHidden={isNavLeftAlwaysHidden}>{children}</LayoutDocsPage>
   )
 
-  const hasCategoryTabs = !!pageContext.globalContext.config.docpress.categoryTabs && !isLandingPage
+  // user decision 2026-10-30: the two-row header is the only design
+  // The second row: the categories as tabs (doc pages, desktop), for a site with more than one category
+  const hasCategoryTabs = pageContext.resolved.categories.length > 1
+  const isCategoryTabsShown = hasCategoryTabs && !isLandingPage
   return (
     <div
-      className={hasCategoryTabs ? 'has-category-tabs' : undefined}
+      className={isCategoryTabsShown ? 'has-category-tabs' : undefined}
       style={{
         ['--block-margin']: `${blockMargin}px`,
         ['--nav-head-height']: `${navHeadHeight}px`,
@@ -123,7 +126,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <div className={isLandingPage ? 'landing-page' : 'doc-page'} style={whitespaceBuster1}>
         <header style={{ position: isTopNavSticky ? 'sticky' : 'relative', top: 0, zIndex: 100 }}>
           <NavHead hasCategoryTabs={hasCategoryTabs} />
-          {hasCategoryTabs && <CategoryTabs />}
+          {isCategoryTabsShown && <CategoryTabs />}
           {/* <MenuModal> is inside here because `container-type` on the page wrapper traps `position: fixed` — https://github.com/brillout/docpress/pull/177 */}
           <MenuModal />
         </header>
@@ -352,7 +355,6 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
     name,
     algolia,
     darkMode,
-    categoryTabs,
     docsUrl: docsUrlSetting,
     topNavigation,
   } = pageContext.globalContext.config.docpress
@@ -360,12 +362,12 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
   const hideNavHeadLogo = isLandingPage && !navMaxWidth
   // With category tabs, the landing page's "Docs" is a link into the docs, where the tabs take over (on desktop)
   const docsUrl =
-    categoryTabs && isLandingPage
+    hasCategoryTabs && isLandingPage
       ? (docsUrlSetting ?? pageContext.resolved.categories.flatMap((category) => category.pages)[0]?.url)
       : undefined
   // The category tabs without `topNavigation`: the search centered in the bar, "Docs" next to it on the landing page
   // (the search doesn't move between the landing page and the docs)
-  const isSearchCentered = !!navMaxWidth && !!categoryTabs && !topNavigation && !!algolia
+  const isSearchCentered = !!navMaxWidth && hasCategoryTabs && !topNavigation && !!algolia
 
   const navHeadSecondary = (
     <div className="nav-head-secondary">
@@ -422,9 +424,7 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
           {darkMode && <ThemeToggle className="icon-button nav-head-theme-toggle" />}
           {docsUrl && <DocsLink href={docsUrl} />}
           {/* On desktop, the category tabs (doc pages) or the "Docs" link (landing page) replace the "Docs" menu */}
-          <MenuToggleMain
-            className={cls(['nav-head-menu-toggle', (hasCategoryTabs || !!docsUrl) && 'show-only-on-mobile'])}
-          />
+          <MenuToggleMain className={cls(['nav-head-menu-toggle', hasCategoryTabs && 'show-only-on-mobile'])} />
           {navHeadSecondary}
         </div>
       </div>
@@ -584,7 +584,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .nav-head-content {
     --icon-text-padding: min(8px, 0.5cqw);
   }
-  /* Tighter gaps in the narrow desktop bar (with 1.2cqw gaps, the touch bar with categoryTabs needs 1028px on the
+  /* Tighter gaps in the narrow desktop bar (with 1.2cqw gaps, the touch bar with the "Docs" link needs 1028px on the
      landing page, and the desktop bar starts at 1002px beside a classic scrollbar) */
   @container container-viewport (width < ${viewSearchField}px) {
     .nav-head-content {
@@ -627,7 +627,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .has-max-width .nav-head-secondary {
     flex-grow: 1;
   }
-  /* Category tabs (\`categoryTabs\`) */
+  /* Category tabs (CategoryTabs.tsx) */
   .has-category-tabs {
     --nav-tabs-height: 44px;
   }
