@@ -423,8 +423,9 @@ function NavHead({ hasCategoryTabs }: { hasCategoryTabs: boolean }) {
           {/* On desktop, it's in <ExternalLinks> */}
           {darkMode && <ThemeToggle className="icon-button nav-head-theme-toggle" />}
           {docsUrl && <DocsLink href={docsUrl} />}
-          {/* On desktop, the category tabs (doc pages) or the "Docs" link (landing page) replace the "Docs" menu */}
-          <MenuToggleMain className={cls(['nav-head-menu-toggle', hasCategoryTabs && 'show-only-on-mobile'])} />
+          {/* On desktop, the "Docs" link (landing page) or the category tabs (doc pages, beside the left navigation, see
+              getStyleLayout()) replace the "Docs" menu */}
+          <MenuToggleMain className={cls(['nav-head-menu-toggle', docsUrl && 'show-only-on-mobile'])} />
           {navHeadSecondary}
         </div>
       </div>
@@ -663,6 +664,10 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
     .nav-head {
       box-shadow: ${barShadowSides};
     }
+    /* The left navigation lists the category's pages (where it's hidden, see getStyleNavLeftHidden()) */
+    .nav-head-menu-toggle {
+      display: none;
+    }
   }
   .nav-head-content-search-centered {
     display: grid;
@@ -671,7 +676,7 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
       justify-self: start;
     }
     /* "Docs" and the links share the last cell */
-    & > .nav-head-docs-link {
+    & > :is(.nav-head-docs-link, .nav-head-menu-toggle) {
       grid-area: 1 / 3;
       justify-self: start;
     }
@@ -726,6 +731,10 @@ ${
 }
 function getStyleNavLeftHidden() {
   return css`
+/* The "Docs" menu, also beside the category tabs */
+.has-category-tabs .nav-head-menu-toggle {
+  display: flex;
+}
 .page-wrapper {
   flex-grow: 1;
 }

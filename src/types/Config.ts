@@ -49,8 +49,8 @@ type Config = {
   tocProgress?: boolean
 
   /**
-   * The docs' entry page: where the landing page's "Docs" link goes. For example a docs home, a page listing the
-   * categories with `<DocsOverview />`.
+   * The docs' entry page: where the landing page's "Docs" link goes (a site with more than one category; otherwise
+   * "Docs" opens the menu). For example a docs home, a page listing the categories with `<DocsOverview />`.
    *
    * @default The first category's first page
    */

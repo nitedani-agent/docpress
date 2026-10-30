@@ -378,7 +378,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - menu opened with the keyboard`, async () => {
-    // The "Docs" menu: on desktop, the category tabs replace it
+    // The "Docs" menu: on desktop, beside the left navigation, the category tabs replace it
     const viewportSize = page.viewportSize()
     await page.setViewportSize({ width: 800, height: 720 })
     await page.goto(getServerUrl() + featuresURL)
@@ -418,6 +418,22 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         { timeout: 5 * 1000 },
       )
     }
+  })
+
+  test(`${featuresURL} - "Docs" menu wherever the left navigation is hidden`, async () => {
+    const viewportSize = page.viewportSize()
+    const isMenuToggleShown = async (url: string, width: number) => {
+      await page.setViewportSize({ width, height: 720 })
+      await page.goto(getServerUrl() + url)
+      return await page.isVisible('.menu-toggle-0')
+    }
+    // Desktop, too narrow for the left navigation
+    expect(await isMenuToggleShown(featuresURL, 1040)).toBe(true)
+    // Beside the left navigation, the category tabs replace it
+    expect(await isMenuToggleShown(featuresURL, 1366)).toBe(false)
+    // `hideMenuLeft`
+    expect(await isMenuToggleShown('/tiny', 1366)).toBe(true)
+    await page.setViewportSize(viewportSize!)
   })
 
   test('client-side navigation', async () => {
