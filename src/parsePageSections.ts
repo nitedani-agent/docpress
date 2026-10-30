@@ -141,12 +141,11 @@ function parseMarkdownMini(titleMarkdown: string): string {
   return titleHtml
 
   function serializeText(text: string) {
-    let textEscaped = text.split("'").join("\\'")
     // https://github.com/brillout/docpress/pull/2
     if (isWindows()) {
-      textEscaped = textEscaped.replace(/\r/, '')
+      text = text.replace(/\r/, '')
     }
-    return `{'${textEscaped}'}`
+    return `{${JSON.stringify(text)}}`
   }
 }
 
