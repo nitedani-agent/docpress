@@ -378,18 +378,22 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
   })
 
   test(`${featuresURL} - menu opened with the keyboard`, async () => {
+    // The "Docs" menu: on desktop, the category tabs replace it
+    const viewportSize = page.viewportSize()
+    await page.setViewportSize({ width: 800, height: 720 })
     await page.goto(getServerUrl() + featuresURL)
     await page.waitForFunction(() => (window as any).__docpress_hydrationFinished)
-    // Its first link gets the focus, also when it's opened again
+    // The dialog's close button gets the focus, and the toggle gets it back, also when it's opened again
     await openWithKeyboard()
     await openWithKeyboard()
+    await page.setViewportSize(viewportSize!)
     async function openWithKeyboard() {
       await page.focus('.menu-toggle-0')
       await page.keyboard.press('Enter')
       await autoRetry(
         async () => {
           const isFocused = await page.evaluate(
-            () => document.activeElement === document.querySelector('#menu-navigation-0 a[href]'),
+            () => document.activeElement === document.querySelector('#menu-modal-wrapper .menu-modal-close'),
           )
           expect(isFocused).toBe(true)
         },
@@ -398,8 +402,12 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       await page.keyboard.press('Escape')
       await autoRetry(
         async () => {
-          const isOpen = await page.evaluate(() => document.documentElement.classList.contains('menu-modal-show'))
-          expect(isOpen).toBe(false)
+          const isClosed = await page.evaluate(
+            () =>
+              !document.documentElement.classList.contains('menu-modal-show') &&
+              document.activeElement === document.querySelector('.menu-toggle-0'),
+          )
+          expect(isClosed).toBe(true)
         },
         { timeout: 5 * 1000 },
       )

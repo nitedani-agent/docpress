@@ -4,9 +4,7 @@ import type { Config } from '@brillout/docpress'
 import logo from './assets/logo.svg'
 import favicon from './assets/favicon.svg'
 import { headings, headingsDetached, categories } from './headings'
-import { TopNavigation } from './TopNavigation'
 import { iconHono, iconExpress, iconFastify, iconH3, iconReact, iconVue, iconSolid } from './assets/choices-icons'
-import React from 'react'
 
 const config: Config = {
   name: 'Demo',
@@ -47,7 +45,6 @@ const config: Config = {
   pressKit: true,
   docsDir: 'demo',
 
-  topNavigation: <TopNavigation />,
   navMaxWidth: 1140,
   choices: {
     server: {
