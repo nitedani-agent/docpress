@@ -32,6 +32,7 @@ describe('extractPageSections()', () => {
       '  ~~~md',
       '  ## Setup',
       '  ~~~',
+      '  ```npm install```',
       '{/*',
       '### Setup',
       '*/}',

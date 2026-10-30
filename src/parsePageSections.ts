@@ -49,7 +49,8 @@ function extractPageSections(code: string) {
       if (fence?.startsWith(codeBlockFence)) codeBlockFence = null
       return line
     }
-    const fence = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1]
+    // The info string of a backtick fence can't contain backticks (CommonMark)
+    const fence = /^ {0,3}(`{3,}(?!.*`)|~{3,})/.exec(line)?.[1]
     if (fence) {
       codeBlockFence = fence
       return line
