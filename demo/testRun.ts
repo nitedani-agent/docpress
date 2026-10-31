@@ -474,16 +474,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await scrollTo(1200)
     await autoRetry(async () => expect(await isScrolledDown()).toBe(true), { timeout: 5 * 1000 })
     await scrollTo(1199)
-    await autoRetry(
-      async () => {
-        expect(await isScrolledDown()).toBe(false)
-        expect(await page.evaluate(() => getComputedStyle(document.querySelector('.category-tabs')!).transform)).toBe(
-          'none',
-        )
-        expect(await getCategory()).toBe('hidden, opacity 0')
-      },
-      { timeout: 5 * 1000 },
-    )
+    await autoRetry(async () => expect(await getCategory()).toBe('hidden, opacity 0'), { timeout: 5 * 1000 })
     const rects = await getRects()
     await scrollTo(1200)
     expect(await getRects()).toBe(rects)
@@ -495,7 +486,6 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       },
       { timeout: 5 * 1000 },
     )
-    // Shown again: the current tab names it
     await scrollTo(1199)
     await autoRetry(async () => expect(await getCategory()).toBe('hidden, opacity 0'), { timeout: 5 * 1000 })
     expect(await getRects()).toBe(rects)
@@ -592,12 +582,32 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
 
   test(`${featuresURL} - category tabs hide on scroll down and come back on scroll up`, async () => {
     await open(featuresURL, 'desktop')
+    const getTabsTransform = () =>
+      page.evaluate(() => getComputedStyle(document.querySelector('.category-tabs')!).transform)
     await scrollTo(1200)
-    await autoRetry(async () => expect(await isScrolledDown()).toBe(true), { timeout: 5 * 1000 })
+    await autoRetry(
+      async () => {
+        expect(await isScrolledDown()).toBe(true)
+        expect(await getTabsTransform()).not.toBe('none')
+      },
+      { timeout: 5 * 1000 },
+    )
     await scrollTo(1199)
-    await autoRetry(async () => expect(await isScrolledDown()).toBe(false), { timeout: 5 * 1000 })
+    await autoRetry(
+      async () => {
+        expect(await isScrolledDown()).toBe(false)
+        expect(await getTabsTransform()).toBe('none')
+      },
+      { timeout: 5 * 1000 },
+    )
     await scrollTo(1500)
-    await autoRetry(async () => expect(await isScrolledDown()).toBe(true), { timeout: 5 * 1000 })
+    await autoRetry(
+      async () => {
+        expect(await isScrolledDown()).toBe(true)
+        expect(await getTabsTransform()).not.toBe('none')
+      },
+      { timeout: 5 * 1000 },
+    )
   })
 
   test(`${featuresURL} - the strip the hidden category tabs leave takes clicks`, async () => {
