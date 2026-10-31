@@ -103,7 +103,10 @@ html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
   opacity: 0;
   /* Also unfocusable */
   visibility: hidden;
-  transition: opacity var(--dp-duration-reveal) var(--dp-ease-out), visibility var(--dp-duration-reveal);
+  /* Over the bar's links' own transition (colorize-on-hover.css) */
+  .nav-head & {
+    transition: opacity var(--dp-duration-reveal) var(--dp-ease-out), visibility var(--dp-duration-reveal);
+  }
   &.is-current::after {
     left: var(--padding-side);
   }
