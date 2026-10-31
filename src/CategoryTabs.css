@@ -10,8 +10,9 @@
   background: var(--dp-color-bg);
   transition: transform var(--dp-duration-reveal) var(--dp-ease-out);
 }
-/* Scrolling down slides the tabs under the sticky top bar (CategoryTabs.tsx), unless they have the keyboard focus */
-html.category-tabs-hidden:not(:has(.category-tabs a:focus-visible)) {
+/* Scrolling down slides the tabs under the sticky top bar (CategoryTabs.tsx), unless they have the keyboard focus. The
+   bar's category keeps them there while it has it. */
+html:is(.category-tabs-hidden, :has(.nav-head-category:focus-visible)):not(:has(.category-tabs a:focus-visible)) {
   .has-category-tabs {
     --nav-tabs-shown-height: 0px;
   }
