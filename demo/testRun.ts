@@ -503,10 +503,10 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
         expect(await isScrolledDown()).toBe(false)
         const { visibility, opacity } = await page.evaluate(() => {
           const { visibility, opacity } = getComputedStyle(document.querySelector('.nav-head-category')!)
-          return { visibility, opacity: parseFloat(opacity) }
+          return { visibility, opacity }
         })
         expect(visibility).toBe('visible')
-        expect(opacity > 0 && opacity < 1).toBe(true)
+        expect(opacity).toMatch(/^0\.\d*[1-9]/)
       },
       { timeout: 5 * 1000 },
     )
@@ -520,7 +520,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await autoRetry(async () => expect(await isScrolledDown()).toBe(true), { timeout: 5 * 1000 })
     await page.focus('.nav-head-logo')
     await page.keyboard.press('Tab')
-    expect(await page.evaluate(() => document.activeElement!.matches('.nav-head-category'))).toBe(true)
+    expect(await page.evaluate(() => document.activeElement!.className)).toContain('nav-head-category')
     await page.keyboard.press('ArrowUp')
     await autoRetry(async () => expect(await isScrolledDown()).toBe(false), { timeout: 5 * 1000 })
     // A hidden element loses the focus on the next frame
