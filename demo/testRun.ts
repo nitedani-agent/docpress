@@ -472,6 +472,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
       })
     expect(await page.textContent('.nav-head-category')).toBe('Overview')
     await scrollTo(1200)
+    await autoRetry(async () => expect(await isCategoryTabsHidden()).toBe(true), { timeout: 5 * 1000 })
     await scrollTo(1199)
     await autoRetry(
       async () => {
