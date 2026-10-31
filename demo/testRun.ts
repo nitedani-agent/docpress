@@ -442,16 +442,16 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await open(featuresURL, 'desktopNarrow')
     const left = await page.evaluate(() => {
       const getLeft = (selector: string) => document.querySelector(selector)?.getBoundingClientRect().left ?? null
-      return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tab-icon') }
+      return { logo: getLeft('.nav-head-logo img'), icon: getLeft('.category-tabs .category-tab-icon') }
     })
     expect(left.icon).toBe(left.logo)
   })
 
   test(`${featuresURL} - the left navigation doesn't repeat the category the current tab names`, async () => {
     await open(featuresURL, 'desktop')
-    expect(await page.textContent('.category-tab.is-current')).toBe('Overview')
+    expect(await page.textContent('.category-tabs .category-tab.is-current')).toBe('Overview')
     expect(await page.isVisible('#nav-left .nav-item-level-2')).toBe(true)
-    expect(await getVisibleText(page, '#navigation-container')).not.toContain('Overview')
+    expect(await getVisibleText(page, '#nav-left')).not.toContain('Overview')
   })
 
   test(`${featuresURL} - the top bar names the category while the category tabs are hidden, and nothing else in it or the sides moves`, async () => {
@@ -633,7 +633,7 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     await autoRetry(
       async () => {
         const tab = await page.evaluate(() => ({
-          isFocused: document.activeElement!.matches('.category-tab'),
+          isFocused: document.activeElement!.matches('.category-tabs .category-tab'),
           transform: getComputedStyle(document.querySelector('.category-tabs')!).transform,
         }))
         expect(tab.isFocused).toBe(true)
