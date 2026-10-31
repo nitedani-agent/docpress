@@ -519,6 +519,10 @@ function getStyleLayout(isNavLeftAlwaysHidden: boolean) {
   .nav-head-content:has(> .nav-head-theme-toggle) > :is(.nav-head-logo, .nav-head-start) {
     flex-grow: 1;
   }
+  /* The logo's link takes its cell (the category after it shows only on desktop) */
+  .nav-head-start > .nav-head-logo {
+    flex-grow: 1;
+  }
   .nav-head .nav-head-menu-toggle {
     justify-content: flex-end;
     padding: 0 var(--main-view-padding) 0 0;

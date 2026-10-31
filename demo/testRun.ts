@@ -543,6 +543,15 @@ function testRun(cmd: 'pnpm run dev' | 'pnpm run preview') {
     expect(category.visibility).toBe('visible')
   })
 
+  test(`${featuresURL} - the logo's link spans the top bar up to the search (phone)`, async () => {
+    await open(featuresURL, 'phone')
+    const bar = await page.evaluate(() => ({
+      logoRight: document.querySelector('.nav-head-logo')!.getBoundingClientRect().right,
+      searchLeft: document.querySelector('.search-link')!.getBoundingClientRect().left,
+    }))
+    expect(bar.logoRight).toBe(bar.searchLeft)
+  })
+
   test(`${featuresURL} - "On this page" below the top bar while the category tabs are hidden`, async () => {
     await open(featuresURL, 'desktop')
     // A slide that outlasts the scroll: the rail is measured from where it ends up
